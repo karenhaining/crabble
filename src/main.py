@@ -4,7 +4,7 @@ from game_state import board
 from game_state import hand
 from vision import process_board
 
-b = process_board.BoardProcessor("./vision/data/Board4Corners.jpg")
+b = process_board.BoardProcessor("./vision/data/BoardQuixote.jpg")
 b.find_corners()
 print(b.corners)
 print(b.ids)

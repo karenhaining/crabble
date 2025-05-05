@@ -51,7 +51,7 @@ class BoardProcessor():
         # TODO fix hardcoding and also the [0][0]s
         src = np.float32([self.corners[tl_ind][0][0], self.corners[tr_ind][0][0],
                 self.corners[bl_ind][0][0], self.corners[br_ind][0][0]])
-        dst = np.array([[0,0],[1000,0],[1000,1000],[0,1000]], np.float32)  # TODO also fix
+        dst = np.array([[1000,1000],[0,1000],[1000,0],[0,0],], np.float32)  # TODO also fix
 
         print(src)
         print(dst)
@@ -59,7 +59,7 @@ class BoardProcessor():
         matrix = cv2.getPerspectiveTransform(src, dst)
 
         # Apply the perspective transform
-        warped_image = cv2.warpPerspective(self.gray, matrix, (500, 500))
+        warped_image = cv2.warpPerspective(self.gray, matrix, (1000, 1000))
 
         # Display the original and transformed images
         cv2.imshow('Original Image', self.gray)
