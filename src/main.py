@@ -1,22 +1,33 @@
+import cv2
+
 from game_state import board
 from game_state import hand
+from vision import process_board
 
-b = board.Board()
+b = process_board.BoardProcessor("./vision/data/Board4Corners.jpg")
+b.find_corners()
+print(b.corners)
+print(b.ids)
+b.unwarp_board()
 
-b.add_tile('a', 0, 0)
-print(b)
+# cv2.imshow('gray.png', b.gray)
 
-h = hand.Hand()
-h.add_tile('b')
-h.add_tile('c')
-h.add_tile('d')
-h.add_tile('b')
-h.add_tile('b')
-h.add_tile('b')
-h.add_tile('b')
-print(h)
-h.remove_tile('b')
-h.remove_tile('b')
+# b = board.Board()
+
+# b.add_tile('a', 0, 0)
+# print(b)
+
+# h = hand.Hand()
+# h.add_tile('b')
+# h.add_tile('c')
+# h.add_tile('d')
+# h.add_tile('b')
+# h.add_tile('b')
+# h.add_tile('b')
+# h.add_tile('b')
+# print(h)
+# h.remove_tile('b')
+# h.remove_tile('b')
 
 
-print(h)
+# print(h)
