@@ -1,0 +1,15 @@
+.gameBoard { 
+  display: grid;
+  border: 2.5px solid white;
+  grid-template-columns:repeat(9, 72px);
+  grid-template-rows: repeat(9, 81px);
+  justify-content: center;
+ }
+
+ .hand { 
+  display: grid;
+  border: 2.5px solid white;
+  grid-template-columns:repeat(7, 72px);
+  grid-template-rows: repeat(1, 81px);
+  justify-content: center;
+ }
