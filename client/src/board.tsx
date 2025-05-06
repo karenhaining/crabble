@@ -34,10 +34,11 @@ const squareContent: Map<string, string> = new Map([
 ]);
 
 function Board(
-  { tiles, hand, n, zoom, row, setRow, col, setCol, selRow, setSelRow, selCol, setSelCol}:
+  { tiles, hand, n, zoom, row, setRow, col, setCol, selRow, setSelRow, selCol, setSelCol, selTile, setSelTile}:
   { tiles: string[][], hand: string[], n: number, zoom: number,
     row: number, setRow: (i: number) => void, col: number, setCol: (j: number) => void,
-    selRow: number, setSelRow: (i: number) => void, selCol: number, setSelCol: (j: number) => void
+    selRow: number, setSelRow: (i: number) => void, selCol: number, setSelCol: (j: number) => void,
+    selTile: number, setSelTile: (i: number) => void
   }) {
   const boardSettings = {
       display: 'grid',
@@ -45,7 +46,7 @@ function Board(
       gridTemplateColumns: `repeat(${n}, ${zoom * 80}px)`,
       gridTemplateRows: `repeat(${n}, ${zoom * 80}px)`,
       justifyContent: 'center',
-      fontSize: `${zoom * 17}px`,
+      fontSize: `${zoom * 16}px`,
       fontWeight: 'bolder'    }
 
   const handSettings = {
@@ -85,20 +86,23 @@ function Board(
     for (let j = 0; j < n; j++) {
       const border = (i == selRow && j == selCol) ? `${5.0 * zoom}px solid red` : `${2.5 * zoom}px solid white`;
       if (tiles[row + i][col + j] != '') {
-        divs.push(<div key ={15 * i + j} style={{border : border, backgroundColor: squareColor.get('TILE'), color: "black"}}>
+        divs.push(<div key ={15 * i + j} style={{border : border, backgroundColor: squareColor.get('TILE'), color: "black"}} onClick={() => {setSelRow(i); setSelCol(j)}}>
           <span style={tileLetter}>{tiles[row + i][col + j]}<sub style={tilePoint}>{tilePoints.get(tiles[row + i][col + j])}</sub></span>
         </div>)
       } else {
-        divs.push(<div key ={15 * i + j} style={{border : border, backgroundColor: squareColor.get(squareTypes[row + i][col + j]), color: "black"}}>{squareContent.get(squareTypes[row + i][col + j])}</div>)
+        divs.push(<div key ={15 * i + j} style={{border : border, backgroundColor: squareColor.get(squareTypes[row + i][col + j]), color: "black"}}  onClick={() => {setSelRow(i); setSelCol(j)}}>{squareContent.get(squareTypes[row + i][col + j])}</div>)
       }
     }
   }
 
   const handDivs: ReactElement[] = [];
   for (let i = 0; i < n; i++) {
-    handDivs.push(<div key ={i} style={{border : `${2.5 * zoom}px solid white`, backgroundColor: squareColor.get('TILE'), color: "black"}}>
-    <span style={tileLetter}>{hand[i]}<sub style={tilePoint}>{tilePoints.get(hand[i])}</sub></span>
-  </div>)
+    const border = (i == selTile) ? `${5.0 * zoom}px solid red` : `${2.5 * zoom}px solid white`;
+    handDivs.push(
+      <div key ={i} style={{border : border, backgroundColor: squareColor.get('TILE'), color: "black"}} onClick={() => {setSelTile(i)}}>
+        <span style={tileLetter}>{hand[i]}<sub style={tilePoint}>{tilePoints.get(hand[i])}</sub></span>
+      </div>
+    )
   }
 
 
