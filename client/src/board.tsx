@@ -1,5 +1,6 @@
 import { KeyboardArrowDown, KeyboardArrowLeft, KeyboardArrowRight, KeyboardArrowUp } from '@mui/icons-material';
 import { ReactElement } from 'react';
+import styles from './boardstyles.module.css'
 
 const squareTypes: string[][] = [
   ['TW', '', '', 'DL', '', '', '', 'TW', '', '', '', 'DL', '', '', 'TW'],
@@ -34,73 +35,76 @@ const squareContent: Map<string, string> = new Map([
 ]);
 
 function Board(
-  { tiles, hand, n, zoom, row, setRow, col, setCol, selRow, setSelRow, selCol, setSelCol, selTile, setSelTile}:
-  { tiles: string[][], hand: string[], n: number, zoom: number,
+  { tiles, hand, n, showGridMarkers, row, setRow, col, setCol, selRow, setSelRow, selCol, setSelCol, selTile, setSelTile}:
+  { tiles: string[][], hand: string[], n: number, showGridMarkers: boolean,
     row: number, setRow: (i: number) => void, col: number, setCol: (j: number) => void,
     selRow: number, setSelRow: (i: number) => void, selCol: number, setSelCol: (j: number) => void,
     selTile: number, setSelTile: (i: number) => void
   }) {
+  
+  const boardGridSize = (showGridMarkers) ? n + 2 : n;
+
   const boardSettings = {
       display: 'grid',
-      border: `${2.5 * zoom}px solid white`,
-      gridTemplateColumns: `repeat(${n}, ${zoom * 80}px)`,
-      gridTemplateRows: `repeat(${n}, ${zoom * 80}px)`,
+      border: `2.5px solid white`,
+      gridTemplateColumns: `repeat(${boardGridSize}, 80px)`,
+      gridTemplateRows: `repeat(${boardGridSize}, 80px)`,
       justifyContent: 'center',
-      fontSize: `${zoom * 16}px`,
-      fontWeight: 'bolder'    }
-
-  const handSettings = {
-    display: 'grid',
-    border: `${2.5 * zoom}px solid white`,
-    gridTemplateColumns: `repeat(${7}, ${zoom * 80}px)`,
-    gridTemplateRows: `repeat(${1}, ${zoom * 80}px)`,
-    justifyContent: 'center',
-  }
+      fontSize: `16px`,
+      fontWeight: 'bolder'
+    }
 
   const tbArrowStyle = {
-    width: `${zoom * 70 * n}px`,
-    height: `${zoom * 70}px`
+    width: `${80 * (boardGridSize)}px`,
+    height: `${100}px`
   }
 
   const lrArrowStyle = {
-    width: `${zoom * 70}px`,
-    height: `${zoom * 70 * n}px`
-  }
-
-  const arrowStyle = {
-    fontSize: `${zoom * 40}px`
-  }
-
-  const tileLetter = {
-    fontSize: `${50 * zoom}px`,
-    fontWeight: "500"
-  }
-
-  const tilePoint = {
-    fontSize: `${20 * zoom}px`
+    width: `${100}px`,
+    height: `${80 * (boardGridSize)}px`
   }
 
   const divs: ReactElement[] = [];
 
+  // Add grid markers
+  if (showGridMarkers) {
+    divs.push(<div></div>)
+    for (let i = 0; i < n; i++) {
+      divs.push(<div className={styles.gridMarker}>{String.fromCharCode(65 + col + i)}</div>)
+    }
+    divs.push(<div></div>)
+  }
+
   for (let i = 0; i < n; i++) {
+    if (showGridMarkers) divs.push(<div  className={styles.gridMarker}>{row + i + 1}</div>)
     for (let j = 0; j < n; j++) {
-      const border = (i == selRow && j == selCol) ? `${5.0 * zoom}px solid red` : `${2.5 * zoom}px solid white`;
+      const border = (row + i == selRow && col + j == selCol) ? `5px solid red` : `2.5px solid white`;
       if (tiles[row + i][col + j] != '') {
-        divs.push(<div key ={15 * i + j} style={{border : border, backgroundColor: squareColor.get('TILE'), color: "black"}} onClick={() => {setSelRow(i); setSelCol(j)}}>
-          <span style={tileLetter}>{tiles[row + i][col + j]}<sub style={tilePoint}>{tilePoints.get(tiles[row + i][col + j])}</sub></span>
+        divs.push(<div key ={15 * i + j} style={{border : border, backgroundColor: squareColor.get('TILE'), color: "black"}} onClick={() => {setSelRow(row + i); setSelCol(col + j)}}>
+          <span className={styles.tileLetter}>{tiles[row + i][col + j]}<sub className={styles.tilePoint}>{tilePoints.get(tiles[row + i][col + j])}</sub></span>
         </div>)
       } else {
-        divs.push(<div key ={15 * i + j} style={{border : border, backgroundColor: squareColor.get(squareTypes[row + i][col + j]), color: "black"}}  onClick={() => {setSelRow(i); setSelCol(j)}}>{squareContent.get(squareTypes[row + i][col + j])}</div>)
+        divs.push(<div key ={15 * i + j} style={{border : border, backgroundColor: squareColor.get(squareTypes[row + i][col + j]), color: "black"}} onClick={() => {setSelRow(row + i); setSelCol(col + j)}}>{squareContent.get(squareTypes[row + i][col + j])}</div>)
       }
     }
+    if (showGridMarkers) divs.push(<div className={styles.gridMarker}>{row + i + 1}</div>)
+
+  }
+
+  if (showGridMarkers) {
+    divs.push(<div></div>)
+    for (let i = 0; i < n; i++) {
+      divs.push(<div  className={styles.gridMarker}>{String.fromCharCode(65 + col + i)}</div>)
+    }
+    divs.push(<div></div>)
   }
 
   const handDivs: ReactElement[] = [];
-  for (let i = 0; i < n; i++) {
-    const border = (i == selTile) ? `${5.0 * zoom}px solid red` : `${2.5 * zoom}px solid white`;
+  for (let i = 0; i < 7; i++) {
+    const border = (i == selTile) ? `5px solid red` : `2.5px solid white`;
     handDivs.push(
       <div key ={i} style={{border : border, backgroundColor: squareColor.get('TILE'), color: "black"}} onClick={() => {setSelTile(i)}}>
-        <span style={tileLetter}>{hand[i]}<sub style={tilePoint}>{tilePoints.get(hand[i])}</sub></span>
+        <span className={styles.tileLetter}>{hand[i]}<sub className={styles.tilePoint}>{tilePoints.get(hand[i])}</sub></span>
       </div>
     )
   }
@@ -109,40 +113,41 @@ function Board(
 
   
 
-  return   <table><tbody>
-    <tr>
-    <td></td>
-    <td><button style={tbArrowStyle} onClick={() => {setRow(Math.max(0, row - 1))}}>
-      <KeyboardArrowUp style={arrowStyle}/>
-    </button></td>
-    <td></td>
-  </tr>
-  <tr>
-    <td><button style={lrArrowStyle} onClick={() => {setCol(Math.max(0, col - 1))}}>
-      <KeyboardArrowLeft style={arrowStyle}/>
-    </button></td>
-    <td>
-      <div style={boardSettings}>
-        {divs}
+  return (
+    <div>
+      <div className={styles.gameBoard}>
+        <table><tbody>
+          <tr>
+          <td></td>
+          <td><button style={tbArrowStyle} onClick={() => {setRow(Math.max(0, row - 1))}}>
+            <KeyboardArrowUp className={styles.arrow}/>
+          </button></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td><button style={lrArrowStyle} onClick={() => {setCol(Math.max(0, col - 1))}}>
+            <KeyboardArrowLeft className={styles.arrow}/>
+          </button></td>
+          <td>
+            <div style={boardSettings}>
+              {divs}
+            </div>
+          </td>
+          <td><button style={lrArrowStyle} onClick={() => {setCol(Math.min(15 - n, col + 1))}}>
+            <KeyboardArrowRight className={styles.arrow}/>
+          </button></td>
+        </tr>
+        <tr>
+          <td></td>
+          <td><button style={tbArrowStyle} onClick={() => {setRow(Math.min(15 - n, row + 1))}}>
+            <KeyboardArrowDown className={styles.arrow}/>
+          </button></td>
+          <td></td>
+        </tr>
+        </tbody></table>
       </div>
-    </td>
-    <td><button style={lrArrowStyle} onClick={() => {setCol(Math.min(6, col + 1))}}>
-      <KeyboardArrowRight style={arrowStyle}/>
-    </button></td>
-  </tr>
-  <tr>
-    <td></td>
-    <td><button style={tbArrowStyle} onClick={() => {setRow(Math.min(6, row + 1))}}>
-      <KeyboardArrowDown style={arrowStyle}/>
-    </button></td>
-    <td></td>
-  </tr>
-  <tr>
-    <td></td>
-    <td><div style={handSettings} >{handDivs}</div></td>
-    <td></td>
-  </tr>
-  </tbody></table>
+      <div className={styles.hand} >{handDivs}</div>
+    </div>);
 }
 
 export default Board;

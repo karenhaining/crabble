@@ -1,15 +1,72 @@
 .gameBoard { 
-  display: grid;
-  border: 2.5px solid white;
-  grid-template-columns:repeat(9, 72px);
-  grid-template-rows: repeat(9, 81px);
+  padding-bottom: 15px;
   justify-content: center;
  }
 
- .hand { 
+.hand { 
   display: grid;
-  border: 2.5px solid white;
-  grid-template-columns:repeat(7, 72px);
-  grid-template-rows: repeat(1, 81px);
+  grid-template-columns:repeat(7, 80px);
+  grid-template-rows: repeat(1, 80px);
+  padding-bottom: 15px;
   justify-content: center;
- }
+}
+
+.arrow {
+  font-size: 40px;
+}
+
+.tileLetter {
+  font-size: 50px;
+  font-weight: 500;
+}
+
+.tilePoint {
+  font-size: 20px;
+}
+
+.gridMarker {
+  font-size: 50px;
+}
+
+.zoomButton {
+  font-size: 30px;
+  width: 100px;
+  height: 90px;
+}
+
+.zoomText {
+  font-size: 55px;
+  width: 80px;
+  height: 100px;
+  text-align: center;
+  align-content: center;
+}
+
+.zoomInput {
+  background-color: #414141;
+  display: flex;
+  justify-content:space-between;
+}
+
+.largeButton {
+  padding-top: 20px;
+  padding-bottom: 20px;
+  font-size: 40px;
+  width: 400px;
+}
+
+.buttonTitleText{
+  font-size: 45px;
+  text-align: center;
+}
+
+.menuTitle{
+  font-size: 80px;
+  font-weight: bolder;
+  text-align: center;
+  border: 2.5px solid white;
+}
+
+.menuOption{
+  padding-top: 20px;
+}
