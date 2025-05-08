@@ -5,10 +5,9 @@ from game_state import hand
 from vision import process_board
 
 b = process_board.BoardProcessor("./vision/data/BoardQuixote.jpg")
-b.find_corners()
-print(b.corners)
-print(b.ids)
-b.unwarp_board()
+# print(b.corners)
+# print(b.ids)
+b.process_board()
 
 # cv2.imshow('gray.png', b.gray)
 

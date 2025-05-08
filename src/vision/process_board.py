@@ -19,51 +19,89 @@ TR = 1              # board top right aruco marker id
 BL = 2              # board bottom left aruco marker id
 BR = 3              # board bottom right aruco marker id
 
+# MISC
+NEW_BOARD_PIXELS = 1000
+
 class BoardProcessor():
 
     def __init__(self, image):
-        self.img = cv2.imread(image)
-        self.gray = cv2.cvtColor(self.img, cv2.COLOR_BGR2GRAY)
+        self._img = cv2.imread(image)
+        self._gray = cv2.cvtColor(self._img, cv2.COLOR_BGR2GRAY)
 
-    def find_corners(self):
+    def _find_corners(self):
         # Find the aruco markers
         aruco_dict = cv2.aruco.getPredefinedDictionary(ARUCO_DICT)
         parameters = cv2.aruco.DetectorParameters()
         detector = cv2.aruco.ArucoDetector(aruco_dict, parameters)
+        corners, ids, _ = detector.detectMarkers(self._gray)
+        ids = np.ndarray.flatten(ids)       # why was this not flattened in the first place???
 
-        corners, ids, _ = detector.detectMarkers(self.gray)
-        self.corners = corners
-        self.ids = ids
+        print(corners)
+        print(ids)
 
         # TODO fix this number later
         if len(ids) < 4:
             raise Exception("Not enough markers detected!")
 
-    def unwarp_board(self):
-        # first, make sure our array is in the right order
-        tl_ind = int(np.where(self.ids == TL)[0])
-        tr_ind = int(np.where(self.ids == TR)[0])
-        bl_ind = int(np.where(self.ids == BL)[0])
-        br_ind = int(np.where(self.ids == BR)[0])
+        # process corners such that it represents the center of the aruco markers
+        # make sure we get the right indices
+        # TODO maybe refactor this into 1 fn
+        tl_indices = np.where(ids == [TL])
+        if len(tl_indices) > 1:
+            raise Exception(f'Too many markers with ID {TL}')
+
+        tr_indices = np.where(ids == TR)
+        if len(tr_indices) > 1:
+            raise Exception(f'Too many markers with ID {TR}')
+
+        bl_indices = np.where(ids == BL)
+        if len(bl_indices) > 1:
+            raise Exception(f'Too many markers with ID{BL}')
+
+        br_indices = np.where(ids == BR)
+        if len(br_indices) > 1:
+            raise Exception(f'Too many markers with ID{BR}')
+
+        tl_ind = int(tl_indices[0])
+        tr_ind = int(tr_indices[0])
+        bl_ind = int(bl_indices[0])
+        br_ind = int(br_indices[0])
         
-        # TODO maybe assert these are all found
+        # process to use midpoints of corners
+        # corners will always be in the order [TL, TR, BL, BR]
+        corner_midpoints = np.float32([self._get_aruco_midpoint(corners[tl_ind]),
+                         self._get_aruco_midpoint(corners[tr_ind]),
+                         self._get_aruco_midpoint(corners[bl_ind]),
+                         self._get_aruco_midpoint(corners[br_ind])])
 
-        # TODO fix hardcoding and also the [0][0]s
-        src = np.float32([self.corners[tl_ind][0][0], self.corners[tr_ind][0][0],
-                self.corners[bl_ind][0][0], self.corners[br_ind][0][0]])
-        dst = np.array([[1000,1000],[0,1000],[1000,0],[0,0],], np.float32)  # TODO also fix
+        self.corners = corner_midpoints
 
-        print(src)
-        print(dst)
+    def _get_aruco_midpoint(self, aruco):
+        # the aruco detection returns all four corners, get the midpoints
+        x, y = np.mean(aruco[0], axis=0)
+        return [x, y]
 
-        matrix = cv2.getPerspectiveTransform(src, dst)
+    def _unwarp_board(self):
+        src = self.corners
+        dst = np.array([[NEW_BOARD_PIXELS, NEW_BOARD_PIXELS],
+                        [0, NEW_BOARD_PIXELS],
+                        [NEW_BOARD_PIXELS, 0],
+                        [0,0],], np.float32)
 
         # Apply the perspective transform
-        warped_image = cv2.warpPerspective(self.gray, matrix, (1000, 1000))
+        matrix = cv2.getPerspectiveTransform(src, dst)
+        warped_image = cv2.warpPerspective(self._gray, matrix, (NEW_BOARD_PIXELS, NEW_BOARD_PIXELS))
+        warped_image = cv2.rotate(warped_image, cv2.ROTATE_180)
 
         # Display the original and transformed images
-        cv2.imshow('Original Image', self.gray)
+        # TODO remove
         cv2.imshow('Warped Image', warped_image)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
+        self.board = warped_image
+
+    def process_board(self):
+        self._find_corners()
+        self._unwarp_board()
+        return self.board
