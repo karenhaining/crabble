@@ -40,7 +40,7 @@ class TileProcessor():
                                         cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
                                         cv2.THRESH_BINARY_INV, 
                                         45, 
-                                        31)
+                                        20)
 
         self.thresh = threshold
         contours, hierarchy = cv2.findContours(threshold, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -102,21 +102,21 @@ class TileProcessor():
         print(f"POSSIBLE CONTOUR INDICES {possible_contour_indexes}")
         print(f"CONTOUR CENTROIDS {contour_centroids}")
 
-        draw_copy = threshold.copy()
-        letter_size = config.NEW_BOARD_PIXELS / config.BOARD_SIZE
-        contour_1_crop = contour_centroids[0][0]
-        center_x, center_y = contour_1_crop  # Coordinates of the center point
-        crop_width, crop_height = letter_size, letter_size  # Desired width and height of the cropped region
-        x1 = int(center_x - crop_width / 2)
-        y1 = int(center_y - crop_height / 2)
-        x2 = int(center_x + crop_width / 2)
-        y2 = int(center_y + crop_height / 2)
-        height, width = draw_copy.shape
-        x1 = max(0, x1)
-        y1 = max(0, y1)
-        x2 = min(width, x2)
-        y2 = min(height, y2)
-        cropped_image = draw_copy[y1:y2, x1:x2]
+        # draw_copy = threshold.copy()
+        # letter_size = config.NEW_BOARD_PIXELS / config.BOARD_SIZE
+        # contour_1_crop = contour_centroids[0][0]
+        # center_x, center_y = contour_1_crop  # Coordinates of the center point
+        # crop_width, crop_height = letter_size, letter_size  # Desired width and height of the cropped region
+        # x1 = int(center_x - crop_width / 2)
+        # y1 = int(center_y - crop_height / 2)
+        # x2 = int(center_x + crop_width / 2)
+        # y2 = int(center_y + crop_height / 2)
+        # height, width = draw_copy.shape
+        # x1 = max(0, x1)
+        # y1 = max(0, y1)
+        # x2 = min(width, x2)
+        # y2 = min(height, y2)
+        # cropped_image = draw_copy[y1:y2, x1:x2]
 
 
         # cv2.imshow('Cropped Image', cropped_image)
@@ -148,7 +148,7 @@ class TileProcessor():
                 cv2.putText(draw, "D%d" % (d) , p, cv2.FONT_HERSHEY_SIMPLEX, 0.3, (0,255,255))
 
                 rc = util.get_centroid_rect(centroid, config.LETTER_TRAIN_SUBPIX_FRAC)
-                crop = cv2.rectangle(draw, rc[0], rc[1], (0, 255, 255), 1)
+                # crop = cv2.rectangle(draw, rc[0], rc[1], (0, 255, 255), 1)
 
                 self.board_centroids[i][j] = centroid
 
