@@ -10,6 +10,7 @@ EMPTY = ' '
 #   overwritten letter
 #   voting on letter value if the model outputs different ones
 
+
 class Board():
     SIZE = 15
 
@@ -26,7 +27,7 @@ class Board():
         return res
 
 
-    def add_tile(self, letter, x, y):
+    def add_tile(self, y, x, letter):
         if x > self.SIZE or y > self.SIZE:
             raise Exception(f'({x}, {y}) out of range')
 
