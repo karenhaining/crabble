@@ -55,6 +55,13 @@
   width: 400px;
 }
 
+.mediumButton {
+  padding-top: 20px;
+  padding-bottom: 20px;
+  font-size: 20px;
+  width: 300px;
+}
+
 .buttonTitleText{
   font-size: 45px;
   text-align: center;
@@ -69,4 +76,22 @@
 
 .menuOption{
   padding-top: 20px;
+  break-before: auto
+}
+
+.multiColDiv {
+  column-count: 3;
+}
+
+.smallButton {
+  font-size: 40px;
+  width: 255px;
+}
+
+.inputField{
+  padding-top: 20px;
+  padding-bottom: 20px;
+  font-size: 55px;
+  width: 100px;
+  text-align: center;
 }

@@ -23,7 +23,7 @@ const squareTypes: string[][] = [
 const tilePoints: Map<string, string> = new Map([
   ['A', '1'], ['B', '3'], ['C', '3'], ['D', '2'], ['E', '1'], ['F', '4'], ['G', '2'], ['H', '4'], ['I', '1'], 
   ['J', '8'], ['K', '5'], ['L', '1'], ['M', '3'], ['N', '1'], ['O', '1'], ['P', '3'], ['Q', '10'], ['R', '1'], 
-  ['S', '1'], ['T', '1'], ['U', '1'], ['V', '4'], ['W', '4'], ['X', '8'], ['Y', '4'], ['Z', '10'], [' ', ' '] 
+  ['S', '1'], ['T', '1'], ['U', '1'], ['V', '4'], ['W', '4'], ['X', '8'], ['Y', '4'], ['Z', '10']
 ]);
 
 const squareColor: Map<string, string> = new Map([
@@ -35,8 +35,8 @@ const squareContent: Map<string, string> = new Map([
 ]);
 
 function Board(
-  { tiles, hand, n, showGridMarkers, row, setRow, col, setCol, selRow, setSelRow, selCol, setSelCol, selTile, setSelTile}:
-  { tiles: string[][], hand: string[], n: number, showGridMarkers: boolean,
+  { tiles, override, hand, n, showGridMarkers, row, setRow, col, setCol, selRow, setSelRow, selCol, setSelCol, selTile, setSelTile}:
+  { tiles: string[][], override: string[][], hand: string[], n: number, showGridMarkers: boolean,
     row: number, setRow: (i: number) => void, col: number, setCol: (j: number) => void,
     selRow: number, setSelRow: (i: number) => void, selCol: number, setSelCol: (j: number) => void,
     selTile: number, setSelTile: (i: number) => void
@@ -68,18 +68,22 @@ function Board(
 
   // Add grid markers
   if (showGridMarkers) {
-    divs.push(<div></div>)
+    divs.push(<div key={"b1"}></div>)
     for (let i = 0; i < n; i++) {
-      divs.push(<div className={styles.gridMarker}>{String.fromCharCode(65 + col + i)}</div>)
+      divs.push(<div key={'tg' + i} className={styles.gridMarker}>{String.fromCharCode(65 + col + i)}</div>)
     }
-    divs.push(<div></div>)
+    divs.push(<div key={"b2"}></div>)
   }
 
   for (let i = 0; i < n; i++) {
-    if (showGridMarkers) divs.push(<div  className={styles.gridMarker}>{row + i + 1}</div>)
+    if (showGridMarkers) divs.push(<div key={'lg' + i} className={styles.gridMarker}>{row + i + 1}</div>)
     for (let j = 0; j < n; j++) {
       const border = (row + i == selRow && col + j == selCol) ? `5px solid red` : `2.5px solid white`;
-      if (tiles[row + i][col + j] != '') {
+      if (override[row + i][col + j] != '' && (override[row + i][col + j] != '-')) {
+        divs.push(<div key ={15 * i + j} style={{border : border, backgroundColor: squareColor.get('TILE'), color: "black"}} onClick={() => {setSelRow(row + i); setSelCol(col + j)}}>
+          <span className={styles.tileLetter}>{override[row + i][col + j]}<sub className={styles.tilePoint}>{tilePoints.get(override[row + i][col + j])}</sub></span>
+        </div>)
+      } else if (tiles[row + i][col + j] != '' && (override[row + i][col + j] != '-')) {
         divs.push(<div key ={15 * i + j} style={{border : border, backgroundColor: squareColor.get('TILE'), color: "black"}} onClick={() => {setSelRow(row + i); setSelCol(col + j)}}>
           <span className={styles.tileLetter}>{tiles[row + i][col + j]}<sub className={styles.tilePoint}>{tilePoints.get(tiles[row + i][col + j])}</sub></span>
         </div>)
@@ -87,16 +91,15 @@ function Board(
         divs.push(<div key ={15 * i + j} style={{border : border, backgroundColor: squareColor.get(squareTypes[row + i][col + j]), color: "black"}} onClick={() => {setSelRow(row + i); setSelCol(col + j)}}>{squareContent.get(squareTypes[row + i][col + j])}</div>)
       }
     }
-    if (showGridMarkers) divs.push(<div className={styles.gridMarker}>{row + i + 1}</div>)
-
+    if (showGridMarkers) divs.push(<div key={'rg' + i} className={styles.gridMarker}>{row + i + 1}</div>)
   }
 
   if (showGridMarkers) {
-    divs.push(<div></div>)
+    divs.push(<div key={"b3"}></div>)
     for (let i = 0; i < n; i++) {
-      divs.push(<div  className={styles.gridMarker}>{String.fromCharCode(65 + col + i)}</div>)
+      divs.push(<div key={'bg' + i} className={styles.gridMarker}>{String.fromCharCode(65 + col + i)}</div>)
     }
-    divs.push(<div></div>)
+    divs.push(<div key={"b4"}></div>)
   }
 
   const handDivs: ReactElement[] = [];
