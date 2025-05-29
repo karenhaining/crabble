@@ -14,21 +14,34 @@ import torch.nn.functional as F
 from game_state import board
 from game_state import hand
 from vision import process_board
-from vision import process_tiles
 from vision import util
 from vision import config
-
+from vision import process_hand
 
 IMAGE = "./vision/original_data/first_round/full_board3.jpg"
+bp = process_board.BoardProcessor()
+bp.set_image(IMAGE)
+bp.crop_to_board()
+bp.process_tiles()
 
-bp = process_board.BoardProcessor(IMAGE)
-bd = bp.process_board()
-corners = bp.get_corners()
+
+HAND_IMAGE = "./vision/image.png"
+hp = process_hand.HandProcessor(HAND_IMAGE)
+hhand = hp.process_hand()
+corners = hp.get_corners()
+
+# im = cv2.imread(HAND_IMAGE)
+# color_crop = util.crop_board(im, corners)
+util.display_image(hhand)
+
+
+# hp = process_board.BoardProcessor(IMAGE)
+# bd = bp.process_board()
+# corners = bp.get_corners()
 
 # im = cv2.imread(IMAGE)
 # color_crop = util.crop_board(im, corners)
 # util.display_image(color_crop)
-
 
 """
 def to_sample(img):
@@ -151,6 +164,13 @@ class LetterModelClassifier:
 
     return None
 
+
+letter_model = LetterModelClassifier()
+letter_model.load()
+lp = process_tiles.TileProcessor(HAND_IMAGE, corners)
+lp.threshold()
+letters = letter_model.classify_all(lp)
+print(letters)
 
 bp = process_board.BoardProcessor(IMAGE)
 bd = bp.process_board()
