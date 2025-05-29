@@ -8,11 +8,11 @@ from vision import config
 from vision import process_hand
 from vision import letter_classifier
 
-IMAGE = "./vision/original_data/first_round/full_board3.jpg"
-bp = process_board.BoardProcessor()
-bp.set_image(IMAGE)
-bp.crop_to_board()
-bp.process_tiles()
+# IMAGE = "./vision/original_data/first_round/full_board3.jpg"
+# bp = process_board.BoardProcessor()
+# bp.set_image(IMAGE)
+# bp.crop_to_board()
+# bp.process_tiles()
 
 
 HAND_IMAGE = "./vision/original_data/image.png"

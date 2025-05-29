@@ -53,9 +53,9 @@ class BoardProcessor():
         proc_image = cv2.warpPerspective(self.img, matrix, (config.NEW_BOARD_PIXELS, config.NEW_BOARD_PIXELS))
         
         # crop markers out of frame
-        x = int(config.MARKER_DIMENSIONS / 2 / config.BOARD_LENGTH * config.NEW_BOARD_PIXELS)
-        y = int(config.MARKER_DIMENSIONS / 2 / config.BOARD_HEIGHT * config.NEW_BOARD_PIXELS)
-        proc_image = proc_image[x:(config.NEW_BOARD_PIXELS - x), y:(config.NEW_BOARD_PIXELS - y)]
+        l = int(config.MARKER_DIMENSIONS / 2 / config.BOARD_LENGTH * config.NEW_BOARD_PIXELS)
+        h = int(config.MARKER_DIMENSIONS / 2 / config.BOARD_HEIGHT * config.NEW_BOARD_PIXELS)
+        proc_image = proc_image[h:(config.NEW_BOARD_PIXELS - h), l:(config.NEW_BOARD_PIXELS - l)]
 
         # crop sidebar out of frame
         x_dim, y_dim, _ = proc_image.shape
