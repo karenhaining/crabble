@@ -169,15 +169,15 @@ class BoardProcessor():
         cv2.waitKey(0)
 
 
-def get_thresh(self, x, y):
-        """
-        Gets a binary threshold image for a specific board coordinate
+    def get_thresh(self, x, y):
+            """
+            Gets a binary threshold image for a specific board coordinate
 
-        Returns None if no letter is detected at that location.
-        """
-        centroid = self.board_centroids[x][y]
-        if not centroid:
-            return None
+            Returns None if no letter is detected at that location.
+            """
+            centroid = self.board_centroids[x][y]
+            if not centroid:
+                return None
 
-        w = int(config.LETTER_SIZE * config.LETTER_TRAIN_SUBPIX_FRAC)
-        return cv2.getRectSubPix(self.thresh, [w, w], centroid)
+            w = int(config.LETTER_SIZE * config.LETTER_TRAIN_SUBPIX_FRAC)
+            return cv2.getRectSubPix(self.thresh, [w, w], centroid)
