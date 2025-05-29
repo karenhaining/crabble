@@ -10,7 +10,11 @@ function Menu({onOptionClick} : {onOptionClick: (s: string) => void}) {
       </div>
       <div className={styles.menuOption}>
         <div className={styles.buttonTitleText}>Play actions</div>
-        <button className={styles.largeButton} onClick={() => onOptionClick('PLAY')}>Open</button>
+        <button className={styles.largeButton} onClick={() => onOptionClick('PLAY')}>OPEN</button>
+      </div>
+      <div className={styles.menuOption}>
+        <div className={styles.buttonTitleText}>Manual config</div>
+        <button className={styles.largeButton} onClick={() => onOptionClick('CONFIG')}>OPEN</button>
       </div>
     </div>
     
