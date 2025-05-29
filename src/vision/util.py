@@ -53,33 +53,6 @@ def find_corners(img, tl, tr, bl, br):
 
     return corner_midpoints
 
-def crop_hand(img, corners):
-    """
-    Given an image of the entire board and the aruco marker corners,
-    crops to board to the playable area. Returns cropped image.
-    """
-    dst = np.array([[0,0],
-                    [config.NEW_HAND_PIXELS_LEN, 0],
-                    [0, config.NEW_HAND_PIXELS_HEIGHT],
-                    [config.NEW_HAND_PIXELS_LEN, config.NEW_HAND_PIXELS_HEIGHT]], 
-                    np.float32)
-
-    # unwarp based on aruco markers
-    matrix = cv2.getPerspectiveTransform(corners, dst)
-    proc_image = cv2.warpPerspective(img, matrix, (config.NEW_HAND_PIXELS_LEN, config.NEW_HAND_PIXELS_HEIGHT))
-    
-    # crop markers out of frame
-    # x = int(config.MARKER_DIMENSIONS / 2 / config.HOLDER_LENGTH * config.NEW_HAND_PIXELS_LEN)
-    # y = int(config.MARKER_DIMENSIONS / 2 / config.HOLDER_HEIGHT * config.NEW_HAND_PIXELS_HEIGHT)
-    # proc_image = proc_image[x:(config.NEW_HAND_PIXELS_LEN - x), y:(config.NEW_HAND_PIXELS_HEIGHT - y)]
-
-
-    # resize back to NEW_BOARD_PIXELS x NEW_BOARD_PIXELS
-    proc_image = cv2.resize(proc_image, (config.NEW_HAND_PIXELS_LEN, config.NEW_HAND_PIXELS_HEIGHT))
-
-    return proc_image
-
-
 def get_centroid_rect(c, frac):
   w = int(config.LETTER_SIZE * frac)
   start = (c[0] - int(w/2), c[1] - int(w/2))

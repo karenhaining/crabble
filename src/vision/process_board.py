@@ -20,6 +20,7 @@ class BoardProcessor():
         """
         Resets the state of the processor for the next image
         """
+        
         self.img = None
         self.cropped_board = None
         self.board_centroids = [[None for _ in range(config.BOARD_SIZE)] for _ in range(config.BOARD_SIZE)]

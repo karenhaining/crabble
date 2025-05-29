@@ -10,6 +10,7 @@ BOARD_LENGTH = 390          # horizontal length of board (in mm)
 MARKER_DIMENSIONS = 38      # size of marker including the white space around (in mm)
 SIDEBAR_DIMENSIONS = 54     # size of the sidebar: edge of board to edge of playable area (in mm) 
 
+HAND_SIZE = 7
 HOLDER_LENGTH = 440
 HOLDER_HEIGHT = 42
 
