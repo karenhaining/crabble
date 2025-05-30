@@ -53,28 +53,51 @@ def find_corners(img, tl, tr, bl, br):
 
     return corner_midpoints
 
-def get_centroid_rect(c, frac):
-  w = int(config.LETTER_SIZE * frac)
-  start = (c[0] - int(w/2), c[1] - int(w/2))
-  end = (start[0] + w, start[1] + w)
-  return [start, end]
+def get_centroid_rect(c, frac, is_board):
+    if is_board:
+        letter_size = config.BOARD_LETTER_SIZE
+    else:
+        letter_size = config.HAND_LETTER_SIZE
 
-def get_center(x, y):
-  return (int(config.LETTER_SIZE * config.LETTER_PAD_FRAC) 
-        + int(config.LETTER_SIZE/2) + config.LETTER_SIZE * x, 
-        int(config.LETTER_SIZE * config.LETTER_PAD_FRAC) 
-        + int(config.LETTER_SIZE/2) + config.LETTER_SIZE * y)
 
-def get_bounding_rect(x, y):
-  start = (int(config.LETTER_SIZE * config.LETTER_PAD_FRAC) + config.LETTER_SIZE * x, 
-        int(config.LETTER_SIZE * config.LETTER_PAD_FRAC) + config.LETTER_SIZE * y)
-  end = (start[0] + config.LETTER_SIZE, start[1] + config.LETTER_SIZE)
-  return [start, end]
+    w = int(letter_size * frac)
+    start = (c[0] - int(w/2), c[1] - int(w/2))
+    end = (start[0] + w, start[1] + w)
+    return [start, end]
+
+
+def get_center(x, y, is_board):
+    if is_board:
+        letter_size = config.BOARD_LETTER_SIZE
+        letter_pad_frac = config.BOARD_LETTER_PAD_FRAC
+    else:
+        letter_size = config.HAND_LETTER_SIZE
+        letter_pad_frac = config.HAND_LETTER_PAD_FRAC
+
+
+    return (int(letter_size * letter_pad_frac) 
+            + int(letter_size/2) + letter_size * x, 
+            int(letter_size * letter_pad_frac) 
+            + int(letter_size/2) + letter_size * y)
+
+def get_bounding_rect(x, y, is_board):
+    if is_board:
+        letter_size = config.BOARD_LETTER_SIZE
+        letter_pad_frac = config.BOARD_LETTER_PAD_FRAC
+    else:
+        letter_size = config.HAND_LETTER_SIZE
+        letter_pad_frac = config.HAND_LETTER_PAD_FRAC
+
+    start = (int(letter_size * letter_pad_frac) + letter_size * x, 
+            int(letter_size * letter_pad_frac) + letter_size * y)
+    end = (start[0] + letter_size, start[1] + letter_size)
+    return [start, end]
+
 
 def distance(p1, p2):
-  (x1, y1) = p1
-  (x2, y2) = p2
-  return math.sqrt((x1 - x2) ** 2 + (y1 - y2) **2)
+    (x1, y1) = p1
+    (x2, y2) = p2
+    return math.sqrt((x1 - x2) ** 2 + (y1 - y2) **2)
 
 def display_image(img, label="Image"):
     cv2.imshow(label, img)

@@ -78,7 +78,7 @@ class BoardProcessor():
         split = cv2.split(cv2.cvtColor(self.cropped_board, cv2.COLOR_RGB2HSV))
         channel = split[2] # V of HSV
 
-        blurred = cv2.GaussianBlur(channel, config.GAUSSIAN_KERNEL, 0)
+        blurred = cv2.GaussianBlur(channel, config.BOARD_GAUSSIAN_KERNEL, 0)
         threshold = cv2.adaptiveThreshold(blurred, 255, 
                                         cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
                                         cv2.THRESH_BINARY_INV, 
@@ -105,18 +105,18 @@ class BoardProcessor():
             areas.append(a)
 
             # Check whether contour area is reasonable for a letter.
-            if a < int(config.LETTER_SIZE**2 * config.LETTER_CONTOUR_MIN_FRAC):
+            if a < int(config.BOARD_LETTER_SIZE**2 * config.BOARD_LETTER_CONTOUR_MIN_FRAC):
                 continue
-            if a > int(config.LETTER_SIZE**2 * config.LETTER_CONTOUR_MAX_FRAC):
+            if a > int(config.BOARD_LETTER_SIZE**2 * config.BOARD_LETTER_CONTOUR_MAX_FRAC):
                 continue
 
             [x,y,w,h] = cv2.boundingRect(c)
             
-            if w > h*config.LETTER_TEXT_RATIO:
+            if w > h*config.BOARD_LETTER_TEXT_RATIO:
                 # Bad ratio, reject these.
                 continue
 
-            if w*h >= config.LETTER_SIZE**2 * config.LETTER_MAX_FILL:
+            if w*h >= config.BOARD_LETTER_SIZE**2 * config.BOARD_LETTER_MAX_FILL:
                 # Too much fill, reject these.
                 continue
 
@@ -145,16 +145,16 @@ class BoardProcessor():
 
         for i in range(0, config.BOARD_SIZE):
             for j in range(0, config.BOARD_SIZE):
-                p = util.get_center(i, j)
+                p = util.get_center(i, j, True)
                 draw = cv2.circle(draw, p, 2, (0,255,0), thickness=3)
 
-                r = util.get_bounding_rect(i, j)
+                r = util.get_bounding_rect(i, j, True)
                 draw = cv2.rectangle(draw, r[0], r[1], (0, 255, 0), 1)
 
                 (centroid, contour_i) = min(contour_centroids, key=lambda k: util.distance(k[0], p))
                 d = util.distance(centroid, p)
 
-                if d > config.LETTER_SIZE * config.LETTER_MAX_SHIFT_FRAC:
+                if d > config.BOARD_LETTER_SIZE * config.BOARD_LETTER_MAX_SHIFT_FRAC:
                     continue
 
                 # Letter detection
@@ -180,5 +180,5 @@ class BoardProcessor():
             if not centroid:
                 return None
 
-            w = int(config.LETTER_SIZE * config.LETTER_TRAIN_SUBPIX_FRAC)
+            w = int(config.BOARD_LETTER_SIZE * config.BOARD_LETTER_TRAIN_SUBPIX_FRAC)
             return cv2.getRectSubPix(self.thresh, [w, w], centroid)

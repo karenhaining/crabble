@@ -5,7 +5,10 @@ from torchvision import transforms
 from PIL import Image
 
 from game_state import board
+from game_state import hand
+from vision import process_board
 from vision import config
+from vision import util
 
 class_names = [
     'A', 'B', 'C', 'D', 'E', 'F', 'G',
@@ -58,19 +61,36 @@ class LetterModelClassifier:
     self._model.eval()
 
   def classify_all(self, finder):
-    letters = board.Board()
-    for j in range(0,config.BOARD_SIZE):
-      for i in range(0,config.BOARD_SIZE):
-        img = finder.get_thresh(i, j)
+    if isinstance(finder, process_board.BoardProcessor):
+
+      letters = board.Board()
+      for j in range(0,config.BOARD_SIZE):
+        for i in range(0,config.BOARD_SIZE):
+          img = finder.get_thresh(i, j)
+          if img is None:
+            continue
+          
+          r, c = self.classify_letter(img)
+          if r is not None:
+            letters.add_tile(i, j, r)
+
+            # util.display_image(img, f"LETTER: {r}, {i}, {j}")
+      return letters
+    
+    else:
+      letters = hand.Hand()
+      for i in range(0,config.HAND_SIZE):
+        img = finder.get_thresh(i)
         if img is None:
           continue
         
-        r = self.classify_letter(img)
+        r, c = self.classify_letter(img)
         if r is not None:
-          letters.add_tile(i, j, r)
+          letters.add_tile(r)
 
-          # util.display_image(img, f"LETTER: {r}, {i}, {j}")
-    return letters
+          util.display_image(img, f"LETTER: {r, c}")
+      return letters
+      
 
   def classify_letter(self, thresh_image):
 
@@ -82,8 +102,8 @@ class LetterModelClassifier:
     predicted_class_index = predicted.item()
     predicted_class = class_names[predicted_class_index]
 
-    if confidence_score > config.CONFIDENCE_THRESHOLD:
-      return predicted_class
+    # if confidence_score > config.CONFIDENCE_THRESHOLD:
+    return predicted_class, confidence_score
 
     return None
 

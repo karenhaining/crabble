@@ -18,9 +18,8 @@ from vision import letter_classifier
 HAND_IMAGE = "./vision/original_data/image.png"
 hp = process_hand.HandProcessor()
 hp.set_image(HAND_IMAGE)
-img = hp.crop_to_hand()
-util.display_image(img, "HAND")
-
+hp.crop_to_hand()
+hp.process_tiles()
 
 # hp = process_board.BoardProcessor(IMAGE)
 # bd = bp.process_board()
@@ -30,9 +29,7 @@ util.display_image(img, "HAND")
 # color_crop = util.crop_board(im, corners)
 # util.display_image(color_crop)
 
-"""
 letter_model = letter_classifier.LetterModelClassifier()
 letter_model.load()
-letters = letter_model.classify_all(bp)
+letters = letter_model.classify_all(hp)
 print(letters)
-"""
