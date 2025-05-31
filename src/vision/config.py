@@ -65,3 +65,11 @@ HAND_LETTER_TRAIN_SUBPIX_FRAC = 0.75
 #   MODEL     #
 ###############
 CONFIDENCE_THRESHOLD = 0.999
+
+
+###############
+#   DEBUG     #
+###############
+DEBUG_CROPS = 0
+DEBUG_HAND_LETTERS = 0
+DEBUG_BOARD_LETTERS = 0

@@ -5,6 +5,9 @@ from std_srvs.srv import Trigger
 from sensor_msgs import CompressedImage
 from std_msgs.msg import String
 
+from vision import process_board
+from vision import process_hand
+from vision import letter_classifier
 
 class VisionNode(Node):
 
@@ -23,6 +26,12 @@ class VisionNode(Node):
     # Subscriber for the camera feed
     self.cameraSub = self.create_subscription(CompressedImage, '/camera/color/image_raw/compressed', self.sub_to_compressed_image_callback, 10)
 
+    # processors
+    self.bp = process_board.BoardProcessor()
+    self.hp = process_hand.HandProcessor()
+    self.classifier = letter_classifier.LetterModelClassifier()
+    self.classifier.load()
+    
     # other state
     self.board_state = ""
     self.compressed_camera  = None
@@ -33,16 +42,22 @@ class VisionNode(Node):
     self.get_logger().info('Incoming board state request')
     response.success = True
     # TODO: Fetch new board state and put in self.board_state
+
+    self.bp.process_tiles()
+    all_letters = self.classifier.classify_all(self.bp)
+    self.board_state = all_letters
+
     response.message = self.board_state
     self.get_logger().info(f"RESPONSE: {response}")
     return response
 
   def sub_to_compressed_image_callback(self, message):
-    # TODO: anything else to do directly when receiving a new image?
     self.compressed_camera = message.data
 
-    # TODO: Remove this
-    self.unwarped_board = message.data
+    self.bp.clear()
+    self.bp.set_image(message.data)
+    board = self.bp.crop_to_board()
+    self.unwarped_board = board
 
     return message
   
@@ -52,7 +67,6 @@ class VisionNode(Node):
     unwarped_board_msg.data = self.unwarped_board
     self.unwarped_board_view_publisher.publish(unwarped_board_msg)
 
-    # TODO: Process letters and put formatted string in self.board_state
     board_state_msg = String()
     board_state_msg.data = self.board_state
     self.board_state_publisher.publish(board_state_msg)

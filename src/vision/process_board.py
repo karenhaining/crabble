@@ -65,8 +65,9 @@ class BoardProcessor():
         # resize back to NEW_BOARD_PIXELS x NEW_BOARD_PIXELS
         self.cropped_board = cv2.resize(proc_image, (config.NEW_BOARD_PIXELS, config.NEW_BOARD_PIXELS))
 
-        # TODO debugging remove
-        util.display_image(self.cropped_board, "BOARD")
+        if config.DEBUG_CROPS:
+            util.display_image(self.cropped_board, "BOARD")
+        
         return self.cropped_board
 
 
@@ -91,7 +92,9 @@ class BoardProcessor():
         draw = threshold.copy()
         cv2.drawContours(draw, contours, -1, (255, 0, 0), 1)
 
-        util.display_image(draw, "HERE")
+
+        if config.DEBUG_CROPS:
+            util.display_image(draw, "HERE")
 
         hulls = []
         areas = []

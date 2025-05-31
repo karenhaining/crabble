@@ -71,7 +71,8 @@ class HandProcessor():
         draw = threshold.copy()
         # cv2.drawContours(draw, contours, -1, (255, 0, 0), 1)
 
-        util.display_image(draw, "HERE")
+        if config.DEBUG_CROPS:
+            util.display_image(draw, "HERE")
 
 
         dist = config.NEW_HAND_PIXELS_LEN / config.HAND_SIZE
@@ -134,7 +135,8 @@ class HandProcessor():
             #     draw = cv2.putText(draw, "A%d" % (a) , hull_centroid, cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255,255,255))
 
 
-            # util.display_image(draw, f"idx {i}, {x}, {y}")
+            if config.DEBUG_HAND_LETTERS:
+                util.display_image(draw, f"idx {i}, {x}, {y}")
 
 
         # draw = threshold.copy()

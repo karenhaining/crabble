@@ -16,21 +16,6 @@ class Hand():
             str += ', ' + self.hand[i]
         str += ']'
         return str
-
-    def remove_tile(self, letter):
-        for i in range(self.SIZE):
-            if self.hand[i] == letter:
-                self.hand[i] = ''
-                return
-            
-        raise Exception(f'{letter} not in hand')
     
-    def add_tile(self, letter):
-        for i in range(self.SIZE):
-            if self.hand[i] == '':
-                self.hand[i] = letter
-                return
-            
-
-        raise Exception("Hand is full")        
-
+    def add_tile(self, letter, idx):
+        self.hand[idx] = letter

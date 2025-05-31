@@ -10,7 +10,7 @@ from vision import process_board
 from vision import config
 from vision import util
 
-MODEL_PATH = 'vision/colab_1.pth'
+MODEL_PATH = 'vision/letter_classifier_BEST_SO_FAR.pth'
 
 class_names = [
     'A', 'B', 'C', 'D', 'E', 'F', 'G',
@@ -23,10 +23,17 @@ class_names = [
 def to_sample(img):
   transform = transforms.Compose([
     transforms.Grayscale(),
-    transforms.Resize((45, 45)),
+    transforms.Resize((28, 28)),      
     transforms.ToTensor(),
     transforms.Normalize((0.5,), (0.5,))
   ])
+
+  # transform = transforms.Compose([
+  #   transforms.Grayscale(),
+  #   transforms.Resize((45, 45)),      
+  #   transforms.ToTensor(),
+  #   transforms.Normalize((0.5,), (0.5,))
+  # ])
 
   # Load and preprocess the image
   img = Image.fromarray(img)
@@ -35,29 +42,12 @@ def to_sample(img):
 
 
 # The model
-# class LetterClassifier(nn.Module):
-#     def __init__(self):
-#         super(LetterClassifier, self).__init__()
-#         self.conv1 = nn.Conv2d(1, 32, 3)
-#         self.conv2 = nn.Conv2d(32, 64, 3)
-#         self.fc1 = nn.Linear(64 * 5 * 5, 128)
-#         self.fc2 = nn.Linear(128, len(class_names))
-
-#     def forward(self, x):
-#         x = torch.relu(self.conv1(x))
-#         x = torch.max_pool2d(x, 2)
-#         x = torch.relu(self.conv2(x))
-#         x = torch.max_pool2d(x, 2)
-#         x = x.view(-1, 64 * 5 * 5)
-#         x = torch.relu(self.fc1(x))
-#         return self.fc2(x)
-
 class LetterClassifier(nn.Module):
     def __init__(self):
         super(LetterClassifier, self).__init__()
         self.conv1 = nn.Conv2d(1, 32, 3)
         self.conv2 = nn.Conv2d(32, 64, 3)
-        self.fc1 = nn.Linear(64 * 9 * 9, 128)  # updated for 45x45 input
+        self.fc1 = nn.Linear(64 * 5 * 5, 128)
         self.fc2 = nn.Linear(128, len(class_names))
 
     def forward(self, x):
@@ -65,9 +55,26 @@ class LetterClassifier(nn.Module):
         x = torch.max_pool2d(x, 2)
         x = torch.relu(self.conv2(x))
         x = torch.max_pool2d(x, 2)
-        x = x.view(-1, 64 * 9 * 9)  # updated
+        x = x.view(-1, 64 * 5 * 5)
         x = torch.relu(self.fc1(x))
         return self.fc2(x)
+
+# class LetterClassifier(nn.Module):
+#     def __init__(self):
+#         super(LetterClassifier, self).__init__()
+#         self.conv1 = nn.Conv2d(1, 32, 3)
+#         self.conv2 = nn.Conv2d(32, 64, 3)
+#         self.fc1 = nn.Linear(64 * 9 * 9, 128)  # updated for 45x45 input
+#         self.fc2 = nn.Linear(128, len(class_names))
+
+#     def forward(self, x):
+#         x = torch.relu(self.conv1(x))
+#         x = torch.max_pool2d(x, 2)
+#         x = torch.relu(self.conv2(x))
+#         x = torch.max_pool2d(x, 2)
+#         x = x.view(-1, 64 * 9 * 9)  # updated
+#         x = torch.relu(self.fc1(x))
+#         return self.fc2(x)
 
 
 
@@ -94,7 +101,8 @@ class LetterModelClassifier:
             r, c = val
             letters.add_tile(i, j, r)
 
-            # util.display_image(img, f"LETTER: {r}, {i}, {j}, {c}")
+            if config.DEBUG_BOARD_LETTERS:
+              util.display_image(img, f"LETTER: {r}, {i}, {j}, {c}")
       return letters
     
     else:
@@ -107,9 +115,10 @@ class LetterModelClassifier:
         val = self.classify_letter(img)
         if val is not None:
           r, c = val
-          letters.add_tile(r)
+          letters.add_tile(r, i)
 
-          util.display_image(img, f"LETTER: {r, c}")
+          if config.DEBUG_HAND_LETTERS:
+            util.display_image(img, f"LETTER: {r, c}")
       return letters
       
 
@@ -123,8 +132,8 @@ class LetterModelClassifier:
     predicted_class_index = predicted.item()
     predicted_class = class_names[predicted_class_index]
 
-    # if confidence_score > config.CONFIDENCE_THRESHOLD:
-    return predicted_class, confidence_score
+    if confidence_score > config.CONFIDENCE_THRESHOLD:
+      return predicted_class, confidence_score
 
-    # return None
+    return None
 
