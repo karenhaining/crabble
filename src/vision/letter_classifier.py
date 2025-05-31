@@ -10,6 +10,8 @@ from vision import process_board
 from vision import config
 from vision import util
 
+MODEL_PATH = 'vision/letter_classifier.pth'
+
 class_names = [
     'A', 'B', 'C', 'D', 'E', 'F', 'G',
     'H', 'I', 'J', 'K', 'L', 'M', 'N',
@@ -57,7 +59,7 @@ class LetterModelClassifier:
     self._model = LetterClassifier()
 
   def load(self):
-    self._model.load_state_dict(torch.load('vision/letter_classifier.pth', map_location=torch.device('cpu')))
+    self._model.load_state_dict(torch.load(MODEL_PATH, map_location=torch.device('cpu')))
     self._model.eval()
 
   def classify_all(self, finder):
@@ -75,7 +77,7 @@ class LetterModelClassifier:
             r, c = val
             letters.add_tile(i, j, r)
 
-            # util.display_image(img, f"LETTER: {r}, {i}, {j}, {c}")
+            util.display_image(img, f"LETTER: {r}, {i}, {j}, {c}")
       return letters
     
     else:

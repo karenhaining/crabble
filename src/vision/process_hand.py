@@ -62,7 +62,7 @@ class HandProcessor():
         threshold = cv2.adaptiveThreshold(blurred, 255, 
                                         cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
                                         cv2.THRESH_BINARY_INV, 
-                                        55, 
+                                        45, 
                                         15)
 
         self.thresh = threshold
@@ -241,7 +241,10 @@ class HandProcessor():
         y = config.NEW_HAND_PIXELS_HEIGHT / 2
         x = offset + i * dist
 
-        w = int(config.HAND_LETTER_SIZE * config.HAND_LETTER_TRAIN_SUBPIX_FRAC * config.HAND_LETTER_MAX_SHIFT_FRAC)
+        x = x + 10
+        y = y + 10
+
+        w = 45
         # w = int(config.BOARD_LETTER_SIZE * config.BOARD_LETTER_TRAIN_SUBPIX_FRAC * config.BOARD_LETTER_MAX_SHIFT_FRAC)
 
         img = cv2.getRectSubPix(self.thresh.copy(), [w, w], (x, y))
