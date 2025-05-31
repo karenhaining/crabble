@@ -70,11 +70,12 @@ class LetterModelClassifier:
           if img is None:
             continue
           
-          r, c = self.classify_letter(img)
-          if r is not None:
+          val = self.classify_letter(img)
+          if val is not None:
+            r, c = val
             letters.add_tile(i, j, r)
 
-            # util.display_image(img, f"LETTER: {r}, {i}, {j}")
+            # util.display_image(img, f"LETTER: {r}, {i}, {j}, {c}")
       return letters
     
     else:
@@ -84,8 +85,9 @@ class LetterModelClassifier:
         if img is None:
           continue
         
-        r, c = self.classify_letter(img)
-        if r is not None:
+        val = self.classify_letter(img)
+        if val is not None:
+          r, c = val
           letters.add_tile(r)
 
           util.display_image(img, f"LETTER: {r, c}")
@@ -105,5 +107,5 @@ class LetterModelClassifier:
     # if confidence_score > config.CONFIDENCE_THRESHOLD:
     return predicted_class, confidence_score
 
-    return None
+    # return None
 

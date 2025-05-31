@@ -242,6 +242,11 @@ class HandProcessor():
         x = offset + i * dist
 
         w = int(config.HAND_LETTER_SIZE * config.HAND_LETTER_TRAIN_SUBPIX_FRAC * config.HAND_LETTER_MAX_SHIFT_FRAC)
+        # w = int(config.BOARD_LETTER_SIZE * config.BOARD_LETTER_TRAIN_SUBPIX_FRAC * config.BOARD_LETTER_MAX_SHIFT_FRAC)
+
         img = cv2.getRectSubPix(self.thresh.copy(), [w, w], (x, y))
+
+        # expected_dim = int(config.BOARD_LETTER_SIZE * config.BOARD_LETTER_TRAIN_SUBPIX_FRAC * config.BOARD_LETTER_MAX_SHIFT_FRAC)
+        # img = cv2.resize(img, (expected_dim, expected_dim))
         return img
 
