@@ -14,8 +14,11 @@ from vision import letter_classifier
 # bp.crop_to_board()
 # bp.process_tiles()
 
+# HAND_IMAGE = "./vision/original_data/holder_pics/20250530_165357.jpg"
 
-HAND_IMAGE = "./vision/original_data/image.png"
+# HAND_IMAGE = "./vision/original_data/image.png"
+HAND_IMAGE = "./vision/original_data/holder_pics/20250530_164707.jpg"
+
 hp = process_hand.HandProcessor()
 hp.set_image(HAND_IMAGE)
 hp.crop_to_hand()
