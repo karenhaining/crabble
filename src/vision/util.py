@@ -3,60 +3,101 @@ import math
 import numpy as np
 from vision import config
 
-def crop_board(img, corners):
-    """
-    Given an image of the entire board and the aruco marker corners,
-    crops to board to the playable area. Returns cropped image.
-    """
-    dst = np.array([[0,0],
-                    [config.NEW_BOARD_PIXELS, 0],
-                    [0, config.NEW_BOARD_PIXELS],
-                    [config.NEW_BOARD_PIXELS, config.NEW_BOARD_PIXELS]], 
-                    np.float32)
+def get_aruco_midpoint(aruco):
+    # the aruco detection returns all four corners, get the midpoints
+    x, y = np.mean(aruco[0], axis=0)
+    return [x, y]
 
-    # unwarp based on aruco markers
-    matrix = cv2.getPerspectiveTransform(corners, dst)
-    proc_image = cv2.warpPerspective(img, matrix, (config.NEW_BOARD_PIXELS, config.NEW_BOARD_PIXELS))
+def find_corners(img, tl, tr, bl, br):
+    # Find the aruco markers
+    aruco_dict = cv2.aruco.getPredefinedDictionary(config.ARUCO_DICT)
+    parameters = cv2.aruco.DetectorParameters()
+    detector = cv2.aruco.ArucoDetector(aruco_dict, parameters)
+    corners, ids, _ = detector.detectMarkers(img)
+    ids = np.ndarray.flatten(ids)       # why was this not flattened in the first place???
+
+    # TODO fix this number later
+    if len(ids) < 4:
+        raise Exception("Not enough markers detected!")
+
+    # process corners such that it represents the center of the aruco markers
+    # make sure we get the right indices
+    # TODO maybe refactor this into 1 fn
+    tl_indices = np.where(ids == [tl])
+    if len(tl_indices) > 1:
+        raise Exception(f'Too many markers with ID {tl}')
+
+    tr_indices = np.where(ids == tr)
+    if len(tr_indices) > 1:
+        raise Exception(f'Too many markers with ID {tr}')
+
+    bl_indices = np.where(ids == bl)
+    if len(bl_indices) > 1:
+        raise Exception(f'Too many markers with ID{bl}')
+
+    br_indices = np.where(ids == br)
+    if len(br_indices) > 1:
+        raise Exception(f'Too many markers with ID{br}')
+
+    tl_ind = int(tl_indices[0])
+    tr_ind = int(tr_indices[0])
+    bl_ind = int(bl_indices[0])
+    br_ind = int(br_indices[0])
     
-    # crop markers out of frame
-    x = int(config.MARKER_DIMENSIONS / 2 / config.BOARD_LENGTH * config.NEW_BOARD_PIXELS)
-    y = int(config.MARKER_DIMENSIONS / 2 / config.BOARD_HEIGHT * config.NEW_BOARD_PIXELS)
-    proc_image = proc_image[x:(config.NEW_BOARD_PIXELS - x), y:(config.NEW_BOARD_PIXELS - y)]
+    # process to use midpoints of corners
+    # corners will always be in the order [TL, TR, BL, BR]
+    corner_midpoints = np.float32([get_aruco_midpoint(corners[tl_ind]),
+                      get_aruco_midpoint(corners[tr_ind]),
+                      get_aruco_midpoint(corners[bl_ind]),
+                      get_aruco_midpoint(corners[br_ind])])
 
-    # crop sidebar out of frame
-    dims = proc_image.shape     # some arrs will have 2 vals, others will have 3
-    x_dim = dims[0]
-    y_dim = dims[1]
-    x = int(config.SIDEBAR_DIMENSIONS / (config.BOARD_LENGTH - config.MARKER_DIMENSIONS) * x_dim)
-    proc_image = proc_image[0:y_dim, x:x_dim]
+    return corner_midpoints
 
-    # resize back to NEW_BOARD_PIXELS x NEW_BOARD_PIXELS
-    proc_image = cv2.resize(proc_image, (config.NEW_BOARD_PIXELS, config.NEW_BOARD_PIXELS))
+def get_centroid_rect(c, frac, is_board):
+    if is_board:
+        letter_size = config.BOARD_LETTER_SIZE
+    else:
+        letter_size = config.HAND_LETTER_SIZE
 
-    return proc_image
 
-def get_centroid_rect(c, frac):
-  w = int(config.LETTER_SIZE * frac)
-  start = (c[0] - int(w/2), c[1] - int(w/2))
-  end = (start[0] + w, start[1] + w)
-  return [start, end]
+    w = int(letter_size * frac)
+    start = (c[0] - int(w/2), c[1] - int(w/2))
+    end = (start[0] + w, start[1] + w)
+    return [start, end]
 
-def get_center(x, y):
-  return (int(config.LETTER_SIZE * config.LETTER_PAD_FRAC) 
-        + int(config.LETTER_SIZE/2) + config.LETTER_SIZE * x, 
-        int(config.LETTER_SIZE * config.LETTER_PAD_FRAC) 
-        + int(config.LETTER_SIZE/2) + config.LETTER_SIZE * y)
 
-def get_bounding_rect(x, y):
-  start = (int(config.LETTER_SIZE * config.LETTER_PAD_FRAC) + config.LETTER_SIZE * x, 
-        int(config.LETTER_SIZE * config.LETTER_PAD_FRAC) + config.LETTER_SIZE * y)
-  end = (start[0] + config.LETTER_SIZE, start[1] + config.LETTER_SIZE)
-  return [start, end]
+def get_center(x, y, is_board):
+    if is_board:
+        letter_size = config.BOARD_LETTER_SIZE
+        letter_pad_frac = config.BOARD_LETTER_PAD_FRAC
+    else:
+        letter_size = config.HAND_LETTER_SIZE
+        letter_pad_frac = config.HAND_LETTER_PAD_FRAC
+
+
+    return (int(letter_size * letter_pad_frac) 
+            + int(letter_size/2) + letter_size * x, 
+            int(letter_size * letter_pad_frac) 
+            + int(letter_size/2) + letter_size * y)
+
+def get_bounding_rect(x, y, is_board):
+    if is_board:
+        letter_size = config.BOARD_LETTER_SIZE
+        letter_pad_frac = config.BOARD_LETTER_PAD_FRAC
+    else:
+        letter_size = config.HAND_LETTER_SIZE
+        letter_pad_frac = config.HAND_LETTER_PAD_FRAC
+
+    start = (int(letter_size * letter_pad_frac) + letter_size * x, 
+            int(letter_size * letter_pad_frac) + letter_size * y)
+    end = (start[0] + letter_size, start[1] + letter_size)
+    return [start, end]
+
 
 def distance(p1, p2):
-  (x1, y1) = p1
-  (x2, y2) = p2
-  return math.sqrt((x1 - x2) ** 2 + (y1 - y2) **2)
+    (x1, y1) = p1
+    (x2, y2) = p2
+    return math.sqrt((x1 - x2) ** 2 + (y1 - y2) **2)
 
 def display_image(img, label="Image"):
     cv2.imshow(label, img)
