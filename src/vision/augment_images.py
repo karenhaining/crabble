@@ -165,68 +165,84 @@ def random_augment(img, config=None):
         }
 
     aug_img = img.copy()
+    
+    added = False
 
     if config.get("edge_noise", True) and np.random.rand() < 0.75:
         aug_img = add_rectangular_edge_noise(aug_img)
+        added = True
 
     if config.get("shrink_and_warp", True) and np.random.rand() < 0.95:
         aug_img = shrink_and_warp(aug_img)
+        added = True
     
     if config.get("salt_pepper", True) and np.random.rand() < 0.5:
         aug_img = add_salt_pepper_noise(aug_img, prob=0.01)
+        added = True
 
     if config.get("add_blob_noise", True) and np.random.rand() < 0.1:
         aug_img = add_blob_noise(aug_img)
+        added = True
+
+    if not added:
+        print("here")
+        aug_img = add_salt_pepper_noise(aug_img, prob=0.03)
 
     return aug_img
 
 
 DIR = "vision/data"
 
-aug_pattern = "_aug.png"
+synth_pattern = "_synth.png"
+holder_pattern = "_holder"
+num_to_gen = 3
 
 for filename in os.listdir(DIR):
     curr_dir = os.path.join(DIR, filename)
-    training_data_folder = os.path.join(curr_dir, "training")
 
-    # first, go delete all the existing augmented images in the training folder
-    for img in os.listdir(training_data_folder):
-        if aug_pattern in img:
-            full_img_name = os.path.join(training_data_folder, img)
+    # first, go delete all the existing synthetic images
+    imgs = os.listdir(curr_dir)
+    for img in imgs:
+        if synth_pattern in img:
+            full_img_name = os.path.join(curr_dir, img)
             os.remove(full_img_name)
 
 
     # now, augment existing images in the training folder
-    for img_name in os.listdir(training_data_folder):
-        if aug_pattern not in img_name:
+    imgs = os.listdir(curr_dir)
+    for img_name in imgs:
+        if synth_pattern not in img_name:
+            
+            if holder_pattern not in img_name:
+                configs = {
+                    "edge_noise": True,
+                    "salt_pepper": True,
+                    "shrink_and_warp": True,
+                    "add_blob_noise": True
+                }
+            else:
+                configs = {
+                    "edge_noise": False,
+                    "salt_pepper": True,
+                    "shrink_and_warp": True,
+                    "add_blob_noise": True
+                }
+            
             try:
-                img_path = os.path.join(training_data_folder, img_name)
+                for i in range(num_to_gen):
+                    img_path = os.path.join(curr_dir, img_name)
 
-                cv_im = cv2.imread(img_path)
-                cv_im = cv2.cvtColor(cv_im, cv2.COLOR_BGR2GRAY)
-                aug = random_augment(cv_im)
+                    cv_im = cv2.imread(img_path)
+                    cv_im = cv2.cvtColor(cv_im, cv2.COLOR_BGR2GRAY)
+                    aug = random_augment(cv_im, configs)
 
-                new_path = os.path.join(training_data_folder, img_name[0:img_name.index(".")] + aug_pattern)
-                cv2.imwrite(new_path, aug)
-            except Exception:
+                    new_path = os.path.join(curr_dir, img_name[0:img_name.index(".")] + "_" + str(i) + synth_pattern)
+                    cv2.imwrite(new_path, aug)
+            except Exception as e:
+                print(e)
                 continue
 
 
-    # augment images in the validation folder + move them to the training folder
-    val_data_folder = os.path.join(curr_dir, "val")
-
-    for img in os.listdir(val_data_folder):
-        try:
-            img_path = os.path.join(val_data_folder, img)
-
-            cv_im = cv2.imread(img_path)
-            cv_im = cv2.cvtColor(cv_im, cv2.COLOR_BGR2GRAY)
-            aug = random_augment(cv_im)
-
-            new_path = os.path.join(training_data_folder, img[0:img.index(".")] + aug_pattern)
-            cv2.imwrite(new_path, aug)
-        except Exception:
-            continue
 
 # walk through each of the letter subdirs
 # for filename in os.listdir(DIR):

@@ -10,7 +10,7 @@ from vision import process_board
 from vision import config
 from vision import util
 
-MODEL_PATH = 'vision/letter_classifier_chat_is_this_good.pth'
+MODEL_PATH = 'vision/letter_classifier_synth_2.pth'
 
 class_names = [
     'A', 'B', 'C', 'D', 'E', 'F', 'G',
@@ -76,6 +76,26 @@ def to_sample(img):
 #         x = torch.relu(self.fc1(x))
 #         return self.fc2(x)
 
+# chat is this good
+# class LetterClassifier(nn.Module):
+#     def __init__(self):
+#         super(LetterClassifier, self).__init__()
+#         self.conv1 = nn.Conv2d(1, 8, kernel_size=3)
+#         self.conv2 = nn.Conv2d(8, 16, kernel_size=3)
+#         self.fc1 = nn.Linear(16 * 9 * 9, 64)  # Based on 45x45 input
+#         self.dropout = nn.Dropout(0.5)        # Dropout to reduce overfitting
+#         self.fc2 = nn.Linear(64, len(class_names))
+
+#     def forward(self, x):
+#         x = F.relu(self.conv1(x))       # -> [B, 8, 43, 43]
+#         x = F.max_pool2d(x, 2)          # -> [B, 8, 21, 21]
+#         x = F.relu(self.conv2(x))       # -> [B, 16, 19, 19]
+#         x = F.max_pool2d(x, 2)          # -> [B, 16, 9, 9]
+#         x = x.view(x.size(0), -1)       # Flatten: [B, 16*9*9]
+#         x = self.dropout(F.relu(self.fc1(x)))
+#         return self.fc2(x)
+
+# synth
 class LetterClassifier(nn.Module):
     def __init__(self):
         super(LetterClassifier, self).__init__()
@@ -94,16 +114,24 @@ class LetterClassifier(nn.Module):
         x = self.dropout(F.relu(self.fc1(x)))
         return self.fc2(x)
 
-
-
-
 class LetterModelClassifier:
   def __init__(self):
     self._model = LetterClassifier()
 
   def load(self):
-    self._model.load_state_dict(torch.load(MODEL_PATH, map_location=torch.device('cpu')))
+    # self._model.load_state_dict(torch.load(MODEL_PATH, map_location=torch.device('cpu')))
+    # self._model.eval()
+    checkpoint = torch.load(MODEL_PATH, map_location=torch.device('cpu'))
+    model_dict = self._model.state_dict()
+    
+    # Filter out unmatched keys
+    pretrained_dict = {k: v for k, v in checkpoint.items() if k in model_dict and v.size() == model_dict[k].size()}
+    
+    # Update current model dict
+    model_dict.update(pretrained_dict)
+    self._model.load_state_dict(model_dict)
     self._model.eval()
+
 
   def classify_all(self, finder):
     if isinstance(finder, process_board.BoardProcessor):
@@ -138,6 +166,7 @@ class LetterModelClassifier:
 
           if config.DEBUG_HAND_LETTERS:
             util.display_image(img, f"LETTER: {r, c}")
+            print(f"{r}, {c}")
       return letters
       
 
