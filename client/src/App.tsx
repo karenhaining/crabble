@@ -5,12 +5,30 @@ import Settings from './Settings';
 import Moves from './Moves';
 import Menu from './Menu';
 import Config from './Config'
+// import { spawn } from 'node:child_process'
 
 function App() {
 
    let trajectoryClient: any;
    let jointState: any;
    let arucoMarkerArray: any;
+
+   // calibration data topics and services
+   let alignmentMathClient: any;
+   let boardCalibTopic: any;
+   let holderCalibTopic: any
+   let boardOffsetTopic: any;
+   let holderOffsetTopic: any;
+
+   // vision topics and services
+   let visionNodeClient: any;
+   let boardState: any;
+   let unwarpedBoardView: any;
+   let unwarpedHandView: any;
+   // am afraid, trembling even, quaking in my shoes
+   
+   // global state variables
+   let calibration: string = "";
 
    let poses: any = {};
    let offsets_from_center: any = 0;
@@ -37,12 +55,28 @@ function App() {
    let ros = new ROSLIB.Ros({
       url: 'wss://hellorobotuw.live'
    });
+   
+    // Create subscription to the camera video topic
+   const subscribeToCameraVideo = () => {
+      let cameraImage = document.getElementById("cameraImage");
+      let topic = new ROSLIB.Topic({
+         ros: ros,
+         name: "/camera/color/image_raw/compressed",
+         messageType: "sensor_msgs/CompressedImage",
+      });
+      topic.subscribe((message) => {
+         cameraImage.src = "data:image/jpg;base64," + message.data;
+      });
+   };
   
    ros.on('connection', function() {
       console.log('Connected to websocket server.');
       createTrajectoryClient();
       subscribeToJointStates();
       subscribeToArucoMarkerArray();
+      createAlignmentMathClient();
+      createCalibrationPublishers();
+      subscribeToCameraVideo();
    });
   
    const subscribeToJointStates = () => {
@@ -77,6 +111,40 @@ function App() {
          actionType: "control_msgs/action/FollowJointTrajectory",
       });
    };
+
+   const createAlignmentMathClient = () => {
+      alignmentMathClient = new ROSLIB.Service({
+        ros: ros,
+        name : '/get_calibration_data',
+        serviceType : 'std_srvs/srv/Trigger'
+      })
+    }
+  
+   const createCalibrationPublishers = () => {
+      boardCalibTopic = new ROSLIB.Topic({
+         ros: ros,
+         name: "/board_calibration_data",
+         messageType: "std_msgs/msg/Float64"
+      });
+
+      holderCalibTopic = new ROSLIB.Topic({
+         ros: ros,
+         name: "/holder_calibration_data",
+         messageType: "std_msgs/msg/Float64"
+      });
+
+      boardOffsetTopic = new ROSLIB.Topic({
+         ros: ros,
+         name: "/board_offset_changes",
+         messageType: "std_msgs/msg/Float64"
+      });
+
+      holderOffsetTopic = new ROSLIB.Topic({
+         ros: ros,
+         name: "/holder_offset_changes",
+         messageType: "std_msgs/msg/Float64"
+      });
+   }
 
    const executeFollowJointTrajectory = (jointNames:any, jointPositions:any, jointVelocities?:any) => {
       let goal;
@@ -116,8 +184,51 @@ function App() {
       }
    };
 
-   // FUNCTIONS THAT MOVE THE ROBOT
+   // Calibration wrapper functions
+   const getCalibrationData = () => {
+      let request = new ROSLIB.ServiceRequest({});
+      alignmentMathClient.callService(request, (response: any) => {calibration = response});
+      console.log(calibration);
+      return calibration;
+   }
+  
+   const publishBoardCalibration = (value: number) => {
+      let msg = new ROSLIB.Message({
+        data: value
+      });
+      boardCalibTopic.publish(msg);
+   }
+  
+   const publishHolderCalibration = (value: number) => {
+      let msg = new ROSLIB.Message({
+        data: value
+      });
+      holderCalibTopic.publish(msg);
+   }
+  
+   const publishBoardOffsetDelta = (delta: number) => {
+      let msg = new ROSLIB.Message({
+        data: delta
+      });
+      boardOffsetTopic.publish(msg);
+   }
+  
+   const publishHolderOffsetDelta = (delta: number) => {
+      let msg = new ROSLIB.Message({
+        data: delta
+      });
+      holderOffsetTopic.publish(msg);
+   }
 
+   // vision node wrapper function
+   const getBoardState = () => {
+      let request = new ROSLIB.ServiceRequest({})
+      visionNodeClient.callService(request, (response: any) => {boardState = response});
+      console.log(boardState);
+      return boardState;
+   }
+
+   // FUNCTIONS THAT MOVE THE ROBOT
    const moveBaseForward = () => {
       offsets_from_center += COLUMNLENGTH/4
           holder_offsets += COLUMNLENGTH/4
@@ -371,9 +482,16 @@ function App() {
    const driveToCenterOfBoardArg = () => {
       driveToCenterOfBoard([0, 2], [1, 3]);
    }
+   
+   // const runScript = () => {
+   //    const pythonProcess = spawn('python',["testPy.py"]);
+
+   //    pythonProcess.stdout.on('data', (data: any) => {
+   //       console.log(data);
+   //    });
+   // }
 
    // INTERFACE THINGS, FOR REAL THIS TIME
-   
    const rawr = new Array(15).fill(null).map(() => new Array(15).fill(""));
    rawr[0][2] = 'C';
    rawr[1][2] = 'R';
@@ -382,18 +500,18 @@ function App() {
    rawr[0][0] = 'M';
    rawr[0][1] = 'I';
    const [menu, setMenu] = useState('MENU');
+   const [useCam, setUseCam] = useState(false);
    const [tiles, setTiles] = useState(rawr);
-   const [override, setOverride] = useState(new Array(15).fill(null).map(() => new Array(15).fill("")));
-   const [n, setN] = useState(7);
+   const [hand, setHand] = useState(new Array(7).fill(null).map(() => ""));
+   const [overrideBoard, setOverrideBoard] = useState(new Array(15).fill(null).map(() => new Array(15).fill("")));
+   const [overrideHand, setOverrideHand] = useState(new Array(7).fill(null).map(() => ""));
+   const [n, setN] = useState(9);
    const [showGridMarkers, setShowGridMarkers] = useState(true);
    const [row, setRow] = useState(0);
    const [col, setCol] = useState(0);
    const [selRow, setSelRow] = useState(-1);
    const [selCol, setSelCol] = useState(-1);
    const [selTile, setSelTile] = useState(-1);
-
-   const hand: string[] = ['C', 'R', 'A', 'B', 'B', 'L', 'E'];
-
 
    const boardMinus = () => {
       if (n > 3) {
@@ -418,11 +536,50 @@ function App() {
    setMenu('MENU');
    }
       
-   const onOverrideClick = (letter: String) => {
-      const newOverride = override.map((row, i) =>
+   const onOverrideBoardClick = (letter: String) => {
+      const newOverrideBoard = overrideBoard.map((row, i) =>
          i === selRow ? row.map((col, j) => (j === selCol ? letter.toUpperCase() : col)) : row
       );
-      setOverride(newOverride);
+      setOverrideBoard(newOverrideBoard);
+   }
+
+   const onOverrideHandClick = (letter: String) => {
+      const newOverrideHand = overrideHand.map((val, i) =>
+         i == selTile ? letter.toUpperCase() : val
+      )
+      setOverrideHand(newOverrideHand);
+   }
+
+   const onCamToggleClick = () => {
+      setUseCam(!useCam);
+      getBoard()
+   }
+
+   const boardPanel = () => {
+      if (useCam) {
+         return <div style={{transform:'rotate(90deg)', paddingRight:'80px'}} id="camera"><img style={{width: '1200px', height: '1200px', objectFit: 'contain'}} id="cameraImage" /></div>;
+      } else {
+         return (<div style={{paddingRight:'80px'}}>
+         <Board
+            tiles={tiles}
+            overrideBoard={overrideBoard}
+            overrideHand={overrideHand}
+            hand={hand}
+            n={n}
+            showGridMarkers={showGridMarkers}
+            row={row}
+            setRow={setRow}
+            col={col}
+            setCol={setCol}
+            selRow={selRow}
+            setSelRow={setSelRow}
+            selCol={selCol}
+            setSelCol={setSelCol}
+            selTile={selTile}
+            setSelTile={setSelTile}
+         ></Board>
+      </div>);
+      }
    }
 
    const menuPanel = () => {
@@ -436,6 +593,8 @@ function App() {
             showGridMarkers={showGridMarkers}
             setShowGridMarkers={setShowGridMarkers}
             onBackClick={onBackClick}
+            useCam={useCam}
+            onCamToggleClick={onCamToggleClick}
          ></Settings>
       } else if (menu == 'CONFIG'){
          return <Config 
@@ -458,30 +617,24 @@ function App() {
             onWristLevelClick={SetHandToBase}
          ></Config>
       } else {
-         return <Moves onBackClick={onBackClick} onOverrideClick={onOverrideClick}></Moves>
+         return <Moves onBackClick={onBackClick} onOverrideBoardClick={onOverrideBoardClick} onOverrideHandClick={onOverrideHandClick}></Moves>
       }
    }
 
+
+   const getBoard = () => {
+      fetch('http://localhost:5000/board').then(res => res.json()).then(doBoardResponse);
+   }
+
+   const doBoardResponse = (res: Response): void => {
+    console.log(res)
+   }
+
+
 return (
    <div style={{display: 'flex'}}>
-      <div style={{paddingRight:'80px'}}>
-         <Board
-            tiles={tiles}
-            override={override}
-            hand={hand}
-            n={n}
-            showGridMarkers={showGridMarkers}
-            row={row}
-            setRow={setRow}
-            col={col}
-            setCol={setCol}
-            selRow={selRow}
-            setSelRow={setSelRow}
-            selCol={selCol}
-            setSelCol={setSelCol}
-            selTile={selTile}
-            setSelTile={setSelTile}
-         ></Board>
+      <div>
+         {boardPanel()}
       </div>
       <div>
          {menuPanel()}

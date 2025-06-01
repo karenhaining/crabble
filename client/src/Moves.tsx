@@ -1,7 +1,7 @@
 import styles from './boardstyles.module.css'
 import { useState } from 'react';
 
-function Moves({onBackClick, onOverrideClick} : {onBackClick: () => void, onOverrideClick: (letter: String) => void}) {
+function Moves({onBackClick, onOverrideBoardClick, onOverrideHandClick} : {onBackClick: () => void, onOverrideBoardClick: (letter: String) => void, onOverrideHandClick: (letter: String) => void}) {
   const [letter, setLetter] = useState('');
   return (
     <div>
@@ -17,7 +17,10 @@ function Moves({onBackClick, onOverrideClick} : {onBackClick: () => void, onOver
       <div className={styles.menuOption}>
         <div className={styles.buttonTitleText}>Override square</div>
         <div style={{display: 'flex', width: "400px"}}>
-          <div style={{paddingRight: "40px"}}>
+          <div>
+            <button className={styles.smallButton} onClick={() => onOverrideHandClick(letter)}>Hand</button>
+          </div>
+          <div>
             <input
               className={styles.inputField}
               maxLength={1}
@@ -25,7 +28,7 @@ function Moves({onBackClick, onOverrideClick} : {onBackClick: () => void, onOver
               onChange={(e) => {setLetter(e.target.value)}}></input>
           </div>
           <div>
-            <button className={styles.smallButton} onClick={() => onOverrideClick(letter)}>Override</button>
+            <button className={styles.smallButton} onClick={() => onOverrideBoardClick(letter)}>Board</button>
           </div>
         </div>
       </div>

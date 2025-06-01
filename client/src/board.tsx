@@ -35,8 +35,8 @@ const squareContent: Map<string, string> = new Map([
 ]);
 
 function Board(
-  { tiles, override, hand, n, showGridMarkers, row, setRow, col, setCol, selRow, setSelRow, selCol, setSelCol, selTile, setSelTile}:
-  { tiles: string[][], override: string[][], hand: string[], n: number, showGridMarkers: boolean,
+  { tiles, overrideBoard, overrideHand, hand, n, showGridMarkers, row, setRow, col, setCol, selRow, setSelRow, selCol, setSelCol, selTile, setSelTile}:
+  { tiles: string[][], overrideBoard: string[][], overrideHand: string[], hand: string[], n: number, showGridMarkers: boolean,
     row: number, setRow: (i: number) => void, col: number, setCol: (j: number) => void,
     selRow: number, setSelRow: (i: number) => void, selCol: number, setSelCol: (j: number) => void,
     selTile: number, setSelTile: (i: number) => void
@@ -79,11 +79,11 @@ function Board(
     if (showGridMarkers) divs.push(<div key={'lg' + i} className={styles.gridMarker}>{row + i + 1}</div>)
     for (let j = 0; j < n; j++) {
       const border = (row + i == selRow && col + j == selCol) ? `5px solid red` : `2.5px solid white`;
-      if (override[row + i][col + j] != '' && (override[row + i][col + j] != '-')) {
+      if (overrideBoard[row + i][col + j] != '' && (overrideBoard[row + i][col + j] != '-')) {
         divs.push(<div key ={15 * i + j} style={{border : border, backgroundColor: squareColor.get('TILE'), color: "black"}} onClick={() => {setSelRow(row + i); setSelCol(col + j)}}>
-          <span className={styles.tileLetter}>{override[row + i][col + j]}<sub className={styles.tilePoint}>{tilePoints.get(override[row + i][col + j])}</sub></span>
+          <span className={styles.tileLetter}>{overrideBoard[row + i][col + j]}<sub className={styles.tilePoint}>{tilePoints.get(overrideBoard[row + i][col + j])}</sub></span>
         </div>)
-      } else if (tiles[row + i][col + j] != '' && (override[row + i][col + j] != '-')) {
+      } else if (tiles[row + i][col + j] != '' && (overrideBoard[row + i][col + j] != '-')) {
         divs.push(<div key ={15 * i + j} style={{border : border, backgroundColor: squareColor.get('TILE'), color: "black"}} onClick={() => {setSelRow(row + i); setSelCol(col + j)}}>
           <span className={styles.tileLetter}>{tiles[row + i][col + j]}<sub className={styles.tilePoint}>{tilePoints.get(tiles[row + i][col + j])}</sub></span>
         </div>)
@@ -105,16 +105,22 @@ function Board(
   const handDivs: ReactElement[] = [];
   for (let i = 0; i < 7; i++) {
     const border = (i == selTile) ? `5px solid red` : `2.5px solid white`;
-    handDivs.push(
+    if (overrideHand[i] != '-' && overrideHand[i] != '') {
+      handDivs.push(
+      <div key ={i} style={{border : border, backgroundColor: squareColor.get('TILE'), color: "black"}} onClick={() => {setSelTile(i)}}>
+        <span className={styles.tileLetter}>{overrideHand[i]}<sub className={styles.tilePoint}>{tilePoints.get(overrideHand[i])}</sub></span>
+      </div>);
+    } else if (overrideHand[i] == '') {
+      handDivs.push(
       <div key ={i} style={{border : border, backgroundColor: squareColor.get('TILE'), color: "black"}} onClick={() => {setSelTile(i)}}>
         <span className={styles.tileLetter}>{hand[i]}<sub className={styles.tilePoint}>{tilePoints.get(hand[i])}</sub></span>
-      </div>
-    )
+      </div>);
+    } else {
+      handDivs.push(
+      <div key ={i} style={{border : border, backgroundColor: squareColor.get('TILE'), color: "black"}} onClick={() => {setSelTile(i)}}></div>);
+    }
   }
 
-
-
-  
 
   return (
     <div>
