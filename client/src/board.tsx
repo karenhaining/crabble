@@ -47,21 +47,21 @@ function Board(
   const boardSettings = {
       display: 'grid',
       border: `2.5px solid white`,
-      gridTemplateColumns: `repeat(${boardGridSize}, 80px)`,
-      gridTemplateRows: `repeat(${boardGridSize}, 80px)`,
+      gridTemplateColumns: `repeat(${boardGridSize}, 60px)`,
+      gridTemplateRows: `repeat(${boardGridSize}, 60px)`,
       justifyContent: 'center',
-      fontSize: `16px`,
+      fontSize: `12px`,
       fontWeight: 'bolder'
     }
 
   const tbArrowStyle = {
-    width: `${80 * (boardGridSize)}px`,
-    height: `${100}px`
+    width: `${60 * (boardGridSize)}px`,
+    height: `${75}px`
   }
 
   const lrArrowStyle = {
-    width: `${100}px`,
-    height: `${80 * (boardGridSize)}px`
+    width: `${75}px`,
+    height: `${60 * (boardGridSize)}px`
   }
 
   const divs: ReactElement[] = [];
@@ -123,7 +123,8 @@ function Board(
 
 
   return (
-    <div>
+    <div style={{display: 'flex'}}>
+      <div className={styles.hand} >{handDivs}</div>
       <div className={styles.gameBoard}>
         <table><tbody>
           <tr>
@@ -155,7 +156,6 @@ function Board(
         </tr>
         </tbody></table>
       </div>
-      <div className={styles.hand} >{handDivs}</div>
     </div>);
 }
 
