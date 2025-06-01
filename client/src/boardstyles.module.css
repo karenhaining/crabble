@@ -48,13 +48,6 @@
   justify-content:space-between;
 }
 
-.largeButton {
-  padding-top: 20px;
-  padding-bottom: 20px;
-  font-size: 40px;
-  width: 400px;
-}
-
 .mediumButton {
   padding-top: 20px;
   padding-bottom: 20px;
@@ -83,15 +76,23 @@
   column-count: 3;
 }
 
+.largeButton {
+  padding-top: 20px;
+  padding-bottom: 20px;
+  font-size: 40px;
+  width: 500px;
+  height: 150px;
+}
+
 .smallButton {
   font-size: 40px;
-  width: 255px;
+  height: 150px;
+  width: 190px;
 }
 
 .inputField{
-  padding-top: 20px;
-  padding-bottom: 20px;
   font-size: 55px;
-  width: 100px;
+  height: 144px;
+  width: 120px;
   text-align: center;
 }
