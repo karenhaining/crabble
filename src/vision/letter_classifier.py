@@ -10,7 +10,7 @@ from vision import process_board
 from vision import config
 from vision import util
 
-MODEL_PATH = 'vision/letter_classifier_BEST_SO_FAR.pth'
+MODEL_PATH = 'vision/letter_classifier_chat_is_this_good.pth'
 
 class_names = [
     'A', 'B', 'C', 'D', 'E', 'F', 'G',
@@ -21,19 +21,19 @@ class_names = [
 
 
 def to_sample(img):
-  transform = transforms.Compose([
-    transforms.Grayscale(),
-    transforms.Resize((28, 28)),      
-    transforms.ToTensor(),
-    transforms.Normalize((0.5,), (0.5,))
-  ])
-
   # transform = transforms.Compose([
   #   transforms.Grayscale(),
-  #   transforms.Resize((45, 45)),      
+  #   transforms.Resize((28, 28)),      
   #   transforms.ToTensor(),
   #   transforms.Normalize((0.5,), (0.5,))
   # ])
+
+  transform = transforms.Compose([
+    transforms.Grayscale(),
+    transforms.Resize((45, 45)),      
+    transforms.ToTensor(),
+    transforms.Normalize((0.5,), (0.5,))
+  ])
 
   # Load and preprocess the image
   img = Image.fromarray(img)
@@ -41,23 +41,23 @@ def to_sample(img):
   return img
 
 
-# The model
-class LetterClassifier(nn.Module):
-    def __init__(self):
-        super(LetterClassifier, self).__init__()
-        self.conv1 = nn.Conv2d(1, 32, 3)
-        self.conv2 = nn.Conv2d(32, 64, 3)
-        self.fc1 = nn.Linear(64 * 5 * 5, 128)
-        self.fc2 = nn.Linear(128, len(class_names))
+# # The model
+# class LetterClassifier(nn.Module):
+#     def __init__(self):
+#         super(LetterClassifier, self).__init__()
+#         self.conv1 = nn.Conv2d(1, 32, 3)
+#         self.conv2 = nn.Conv2d(32, 64, 3)
+#         self.fc1 = nn.Linear(64 * 5 * 5, 128)
+#         self.fc2 = nn.Linear(128, len(class_names))
 
-    def forward(self, x):
-        x = torch.relu(self.conv1(x))
-        x = torch.max_pool2d(x, 2)
-        x = torch.relu(self.conv2(x))
-        x = torch.max_pool2d(x, 2)
-        x = x.view(-1, 64 * 5 * 5)
-        x = torch.relu(self.fc1(x))
-        return self.fc2(x)
+#     def forward(self, x):
+#         x = torch.relu(self.conv1(x))
+#         x = torch.max_pool2d(x, 2)
+#         x = torch.relu(self.conv2(x))
+#         x = torch.max_pool2d(x, 2)
+#         x = x.view(-1, 64 * 5 * 5)
+#         x = torch.relu(self.fc1(x))
+#         return self.fc2(x)
 
 # class LetterClassifier(nn.Module):
 #     def __init__(self):
@@ -75,6 +75,25 @@ class LetterClassifier(nn.Module):
 #         x = x.view(-1, 64 * 9 * 9)  # updated
 #         x = torch.relu(self.fc1(x))
 #         return self.fc2(x)
+
+class LetterClassifier(nn.Module):
+    def __init__(self):
+        super(LetterClassifier, self).__init__()
+        self.conv1 = nn.Conv2d(1, 8, kernel_size=3)
+        self.conv2 = nn.Conv2d(8, 16, kernel_size=3)
+        self.fc1 = nn.Linear(16 * 9 * 9, 64)  # Based on 45x45 input
+        self.dropout = nn.Dropout(0.5)        # Dropout to reduce overfitting
+        self.fc2 = nn.Linear(64, len(class_names))
+
+    def forward(self, x):
+        x = F.relu(self.conv1(x))       # -> [B, 8, 43, 43]
+        x = F.max_pool2d(x, 2)          # -> [B, 8, 21, 21]
+        x = F.relu(self.conv2(x))       # -> [B, 16, 19, 19]
+        x = F.max_pool2d(x, 2)          # -> [B, 16, 9, 9]
+        x = x.view(x.size(0), -1)       # Flatten: [B, 16*9*9]
+        x = self.dropout(F.relu(self.fc1(x)))
+        return self.fc2(x)
+
 
 
 

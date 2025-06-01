@@ -16,7 +16,16 @@ class HandProcessor():
         self.cropped_hand = None
         self.hand_centroids = [None for _ in range(config.HAND_SIZE)]
     
-    def set_image(self, image):
+    def set_image_from_msg(self, image):
+        """
+        Sets the image to be processed
+        """
+        np_arr = np.fromstring(image.data.tobytes(), np.uint8)
+        sideways_image = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+        self.img = cv2.rotate(sideways_image, cv2.ROTATE_90_CLOCKWISE)
+
+
+    def set_image_from_file(self, image):
         """
         Sets the image to be processed
         """
