@@ -5,7 +5,7 @@ import Settings from './Settings';
 import Moves from './Moves';
 import Menu from './Menu';
 import Config from './Config'
-import { spawn } from 'node:child_process'
+// import { spawn } from 'node:child_process'
 
 function App() {
 
@@ -482,14 +482,14 @@ function App() {
    const driveToCenterOfBoardArg = () => {
       driveToCenterOfBoard([0, 2], [1, 3]);
    }
+   
+   // const runScript = () => {
+   //    const pythonProcess = spawn('python',["testPy.py"]);
 
-   const runScript = () => {
-      const pythonProcess = spawn('python',["testPy.py"]);
-
-      pythonProcess.stdout.on('data', (data: any) => {
-         console.log(data);
-      });
-   }
+   //    pythonProcess.stdout.on('data', (data: any) => {
+   //       console.log(data);
+   //    });
+   // }
 
    // INTERFACE THINGS, FOR REAL THIS TIME
    const rawr = new Array(15).fill(null).map(() => new Array(15).fill(""));
@@ -552,6 +552,7 @@ function App() {
 
    const onCamToggleClick = () => {
       setUseCam(!useCam);
+      getBoard()
    }
 
    const boardPanel = () => {
@@ -594,7 +595,6 @@ function App() {
             onBackClick={onBackClick}
             useCam={useCam}
             onCamToggleClick={onCamToggleClick}
-            onVisionClick={runScript}
          ></Settings>
       } else if (menu == 'CONFIG'){
          return <Config 
@@ -620,6 +620,16 @@ function App() {
          return <Moves onBackClick={onBackClick} onOverrideBoardClick={onOverrideBoardClick} onOverrideHandClick={onOverrideHandClick}></Moves>
       }
    }
+
+
+   const getBoard = () => {
+      fetch('http://localhost:5000/board').then(res => res.json()).then(doBoardResponse);
+   }
+
+   const doBoardResponse = (res: Response): void => {
+    console.log(res)
+   }
+
 
 return (
    <div style={{display: 'flex'}}>

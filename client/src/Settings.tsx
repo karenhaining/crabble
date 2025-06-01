@@ -1,7 +1,7 @@
 import styles from './boardstyles.module.css'
 
-function Settings({n, boardMinus, boardPlus, showGridMarkers, setShowGridMarkers, useCam, onBackClick, onCamToggleClick, onVisionClick}:
-  {n: number, boardMinus: () => void, boardPlus: () => void, showGridMarkers: boolean, useCam: boolean, setShowGridMarkers: (b: boolean) => void, onBackClick: () => void, onCamToggleClick: () => void, onVisionClick: () => void}) {
+function Settings({n, boardMinus, boardPlus, showGridMarkers, setShowGridMarkers, useCam, onBackClick, onCamToggleClick}:
+  {n: number, boardMinus: () => void, boardPlus: () => void, showGridMarkers: boolean, useCam: boolean, setShowGridMarkers: (b: boolean) => void, onBackClick: () => void, onCamToggleClick: () => void}) {
 
   const gridText = (showGridMarkers) ? 'ON' : 'OFF'; 
   const camText = (useCam) ? 'ON' : 'OFF'; 
@@ -24,10 +24,6 @@ function Settings({n, boardMinus, boardPlus, showGridMarkers, setShowGridMarkers
       <div className={styles.menuOption}>
         <div className={styles.buttonTitleText}>Show Cam View</div>
         <button className={styles.largeButton} onClick={onCamToggleClick}>{camText}</button>
-      </div>
-      <div className={styles.menuOption}>
-        <div className={styles.buttonTitleText}>Run Vision</div>
-        <button className={styles.largeButton} onClick={onVisionClick}>VISION</button>
       </div>
       <div className={styles.menuOption}>
         <div className={styles.buttonTitleText}>Return to Menu</div>
