@@ -178,8 +178,9 @@ class BoardProcessor():
                 self.board_centroids[i][j] = centroid
 
         # TODO remove debugging
-        cv2.imshow("final image?", draw)
-        cv2.waitKey(0)
+        if config.DEBUG_CROPS:
+            util.display_image(draw, "FINAL IMAGE?")
+
 
 
     def get_thresh(self, x, y):

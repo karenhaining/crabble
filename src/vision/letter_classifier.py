@@ -10,7 +10,7 @@ from vision import process_board
 from vision import config
 from vision import util
 
-MODEL_PATH = 'vision/letter_classifier_synth_2.pth'
+MODEL_PATH = 'vision/letter_classifier_synth_3.pth'
 
 class_names = [
     'A', 'B', 'C', 'D', 'E', 'F', 'G',
@@ -117,6 +117,7 @@ class LetterClassifier(nn.Module):
 class LetterModelClassifier:
   def __init__(self):
     self._model = LetterClassifier()
+    self.mode = None
 
   def load(self):
     # self._model.load_state_dict(torch.load(MODEL_PATH, map_location=torch.device('cpu')))
@@ -135,7 +136,7 @@ class LetterModelClassifier:
 
   def classify_all(self, finder):
     if isinstance(finder, process_board.BoardProcessor):
-
+      self.mode = "BOARD"
       letters = board.Board()
       for j in range(0,config.BOARD_SIZE):
         for i in range(0,config.BOARD_SIZE):
@@ -153,6 +154,7 @@ class LetterModelClassifier:
       return letters
     
     else:
+      self.mode = "HAND"
       letters = hand.Hand()
       for i in range(0,config.HAND_SIZE):
         img = finder.get_thresh(i)
@@ -164,9 +166,6 @@ class LetterModelClassifier:
           r, c = val
           letters.add_tile(r, i)
 
-          if config.DEBUG_HAND_LETTERS:
-            util.display_image(img, f"LETTER: {r, c}")
-            print(f"{r}, {c}")
       return letters
       
 
@@ -180,7 +179,13 @@ class LetterModelClassifier:
     predicted_class_index = predicted.item()
     predicted_class = class_names[predicted_class_index]
 
-    if confidence_score > config.CONFIDENCE_THRESHOLD:
+    if self.mode == "HAND" and config.DEBUG_HAND_LETTERS:
+      print(f"PRED: {predicted_class}, CONF: {confidence_score}")
+      util.display_image(thresh_image, "LETTER")
+
+    threshold = config.HAND_CONFIDENCE_THRESHOLD if self.mode == "HAND" else config.BOARD_CONFIDENCE_THRESHOLD
+
+    if confidence_score >= threshold:
       return predicted_class, confidence_score
 
     return None

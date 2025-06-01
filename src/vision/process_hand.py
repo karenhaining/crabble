@@ -144,7 +144,7 @@ class HandProcessor():
             #     draw = cv2.putText(draw, "A%d" % (a) , hull_centroid, cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255,255,255))
 
 
-            if config.DEBUG_HAND_LETTERS:
+            if config.DEBUG_CROPS:
                 util.display_image(draw, f"idx {i}, {x}, {y}")
 
 
