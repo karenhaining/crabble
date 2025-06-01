@@ -10,7 +10,7 @@ from vision import process_board
 from vision import config
 from vision import util
 
-MODEL_PATH = 'vision/letter_classifier_BEST_SO_FAR.pth'
+MODEL_PATH = 'vision/letter_classifier_synth_3.pth'
 
 class_names = [
     'A', 'B', 'C', 'D', 'E', 'F', 'G',
@@ -21,19 +21,19 @@ class_names = [
 
 
 def to_sample(img):
-  transform = transforms.Compose([
-    transforms.Grayscale(),
-    transforms.Resize((28, 28)),      
-    transforms.ToTensor(),
-    transforms.Normalize((0.5,), (0.5,))
-  ])
-
   # transform = transforms.Compose([
   #   transforms.Grayscale(),
-  #   transforms.Resize((45, 45)),      
+  #   transforms.Resize((28, 28)),      
   #   transforms.ToTensor(),
   #   transforms.Normalize((0.5,), (0.5,))
   # ])
+
+  transform = transforms.Compose([
+    transforms.Grayscale(),
+    transforms.Resize((45, 45)),      
+    transforms.ToTensor(),
+    transforms.Normalize((0.5,), (0.5,))
+  ])
 
   # Load and preprocess the image
   img = Image.fromarray(img)
@@ -41,23 +41,23 @@ def to_sample(img):
   return img
 
 
-# The model
-class LetterClassifier(nn.Module):
-    def __init__(self):
-        super(LetterClassifier, self).__init__()
-        self.conv1 = nn.Conv2d(1, 32, 3)
-        self.conv2 = nn.Conv2d(32, 64, 3)
-        self.fc1 = nn.Linear(64 * 5 * 5, 128)
-        self.fc2 = nn.Linear(128, len(class_names))
+# # The model
+# class LetterClassifier(nn.Module):
+#     def __init__(self):
+#         super(LetterClassifier, self).__init__()
+#         self.conv1 = nn.Conv2d(1, 32, 3)
+#         self.conv2 = nn.Conv2d(32, 64, 3)
+#         self.fc1 = nn.Linear(64 * 5 * 5, 128)
+#         self.fc2 = nn.Linear(128, len(class_names))
 
-    def forward(self, x):
-        x = torch.relu(self.conv1(x))
-        x = torch.max_pool2d(x, 2)
-        x = torch.relu(self.conv2(x))
-        x = torch.max_pool2d(x, 2)
-        x = x.view(-1, 64 * 5 * 5)
-        x = torch.relu(self.fc1(x))
-        return self.fc2(x)
+#     def forward(self, x):
+#         x = torch.relu(self.conv1(x))
+#         x = torch.max_pool2d(x, 2)
+#         x = torch.relu(self.conv2(x))
+#         x = torch.max_pool2d(x, 2)
+#         x = x.view(-1, 64 * 5 * 5)
+#         x = torch.relu(self.fc1(x))
+#         return self.fc2(x)
 
 # class LetterClassifier(nn.Module):
 #     def __init__(self):
@@ -76,19 +76,67 @@ class LetterClassifier(nn.Module):
 #         x = torch.relu(self.fc1(x))
 #         return self.fc2(x)
 
+# chat is this good
+# class LetterClassifier(nn.Module):
+#     def __init__(self):
+#         super(LetterClassifier, self).__init__()
+#         self.conv1 = nn.Conv2d(1, 8, kernel_size=3)
+#         self.conv2 = nn.Conv2d(8, 16, kernel_size=3)
+#         self.fc1 = nn.Linear(16 * 9 * 9, 64)  # Based on 45x45 input
+#         self.dropout = nn.Dropout(0.5)        # Dropout to reduce overfitting
+#         self.fc2 = nn.Linear(64, len(class_names))
 
+#     def forward(self, x):
+#         x = F.relu(self.conv1(x))       # -> [B, 8, 43, 43]
+#         x = F.max_pool2d(x, 2)          # -> [B, 8, 21, 21]
+#         x = F.relu(self.conv2(x))       # -> [B, 16, 19, 19]
+#         x = F.max_pool2d(x, 2)          # -> [B, 16, 9, 9]
+#         x = x.view(x.size(0), -1)       # Flatten: [B, 16*9*9]
+#         x = self.dropout(F.relu(self.fc1(x)))
+#         return self.fc2(x)
+
+# synth
+class LetterClassifier(nn.Module):
+    def __init__(self):
+        super(LetterClassifier, self).__init__()
+        self.conv1 = nn.Conv2d(1, 8, kernel_size=3)
+        self.conv2 = nn.Conv2d(8, 16, kernel_size=3)
+        self.fc1 = nn.Linear(16 * 9 * 9, 64)  # Based on 45x45 input
+        self.dropout = nn.Dropout(0.5)        # Dropout to reduce overfitting
+        self.fc2 = nn.Linear(64, len(class_names))
+
+    def forward(self, x):
+        x = F.relu(self.conv1(x))       # -> [B, 8, 43, 43]
+        x = F.max_pool2d(x, 2)          # -> [B, 8, 21, 21]
+        x = F.relu(self.conv2(x))       # -> [B, 16, 19, 19]
+        x = F.max_pool2d(x, 2)          # -> [B, 16, 9, 9]
+        x = x.view(x.size(0), -1)       # Flatten: [B, 16*9*9]
+        x = self.dropout(F.relu(self.fc1(x)))
+        return self.fc2(x)
 
 class LetterModelClassifier:
   def __init__(self):
     self._model = LetterClassifier()
+    self.mode = None
 
   def load(self):
-    self._model.load_state_dict(torch.load(MODEL_PATH, map_location=torch.device('cpu')))
+    # self._model.load_state_dict(torch.load(MODEL_PATH, map_location=torch.device('cpu')))
+    # self._model.eval()
+    checkpoint = torch.load(MODEL_PATH, map_location=torch.device('cpu'))
+    model_dict = self._model.state_dict()
+    
+    # Filter out unmatched keys
+    pretrained_dict = {k: v for k, v in checkpoint.items() if k in model_dict and v.size() == model_dict[k].size()}
+    
+    # Update current model dict
+    model_dict.update(pretrained_dict)
+    self._model.load_state_dict(model_dict)
     self._model.eval()
+
 
   def classify_all(self, finder):
     if isinstance(finder, process_board.BoardProcessor):
-
+      self.mode = "BOARD"
       letters = board.Board()
       for j in range(0,config.BOARD_SIZE):
         for i in range(0,config.BOARD_SIZE):
@@ -106,6 +154,7 @@ class LetterModelClassifier:
       return letters
     
     else:
+      self.mode = "HAND"
       letters = hand.Hand()
       for i in range(0,config.HAND_SIZE):
         img = finder.get_thresh(i)
@@ -117,8 +166,6 @@ class LetterModelClassifier:
           r, c = val
           letters.add_tile(r, i)
 
-          if config.DEBUG_HAND_LETTERS:
-            util.display_image(img, f"LETTER: {r, c}")
       return letters
       
 
@@ -132,7 +179,13 @@ class LetterModelClassifier:
     predicted_class_index = predicted.item()
     predicted_class = class_names[predicted_class_index]
 
-    if confidence_score > config.CONFIDENCE_THRESHOLD:
+    if self.mode == "HAND" and config.DEBUG_HAND_LETTERS:
+      print(f"PRED: {predicted_class}, CONF: {confidence_score}")
+      util.display_image(thresh_image, "LETTER")
+
+    threshold = config.HAND_CONFIDENCE_THRESHOLD if self.mode == "HAND" else config.BOARD_CONFIDENCE_THRESHOLD
+
+    if confidence_score >= threshold:
       return predicted_class, confidence_score
 
     return None
