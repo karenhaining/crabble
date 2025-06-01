@@ -1,3 +1,4 @@
 *__pycache__
 
 src/vision/original_data/*
+src/vision/unsorted_data/*

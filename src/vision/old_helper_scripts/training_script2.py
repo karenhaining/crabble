@@ -3,7 +3,7 @@ import shutil
 from PIL import Image
 
 source_folder = "vision/unsorted_data"
-dst_base = "vision/sorted_data/"
+dst_base = "vision/data/"
 
 
 

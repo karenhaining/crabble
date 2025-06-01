@@ -1,11 +1,12 @@
 import os 
 
-DIR = "vision/data/Y/"
+DIR = "vision/unsorted_data"
 
 for filename in os.listdir(DIR):
     old_file_path = os.path.join(DIR, filename)
 
-    new_filename = filename[0:filename.index(".")] + ".png"
+    # new_filename = "holder_" + filename[0:filename.index(".")] + ".jpg"
+    new_filename = filename.replace(".jpg", "_")
     new_file_path = os.path.join(DIR, new_filename)
  
     if (os.path.exists(new_filename)):
