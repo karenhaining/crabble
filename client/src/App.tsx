@@ -5,7 +5,6 @@ import Settings from './Settings';
 import Moves from './Moves';
 import Menu from './Menu';
 import Config from './Config'
-// import { spawn } from 'node:child_process'
 
 function App() {
 
@@ -40,20 +39,26 @@ function App() {
 
    const JOINTNAMES = ["wrist_extension", "joint_lift", "joint_head_pan", "joint_head_tilt",
                      "joint_wrist_yaw", "joint_wrist_pitch", "joint_wrist_roll", "gripper_aperture"]
-   const ROWLENGTH = 0.0195;
-   const HOLDERWIDTH = 0.062
-   const ROWONE = 0.427;
-   const TABLETOP = 0.777;
-   const COLUMNLENGTH = 0.023;
-   const GRIPPER_HOLDING = 0.033;
-   const OFFSET_FOR_BOARD_CENTERING = 1; // TODO: Measure and change this value
-   const ARM_OFFSET = 0.60;
-   const ROTATION_OFFSET = 0;//0.075;
-   const PARK_DISTANCE = 0.90;
-   const EPSILON = 0.001;
+  const ROWLENGTH = 0.0190;
+  const HOLDERWIDTH = 0.057
+  const ROWONE = 0.427;
+  const TABLETOP = 0.76313;
+  const NEUTRAL_ELEV = 0.81;
+  const HOLDERTOP = 0.75158;
+  const COLUMNLENGTH = 0.023;
+  const GRIPPER_OPEN = 0.040;
+  const GRIPPER_HOLDING = 0.017;
+  const OFFSET_FOR_BOARD_CENTERING = 1; // TODO: Measure and change this value
+  const ROTATION_OFFSET = 0;//0.075;
+  const PARK_DISTANCE = 1.02;
+  const EPSILON = 0.001;
+
+   const d = new Date();
+   let lastCamTime = 0;
 
    let ros = new ROSLIB.Ros({
       url: 'wss://hellorobotuw.live'
+      // url: 'ws://rocky.hcrlab.cs.washington.edu:9090'
    });
    
     // Create subscription to the camera video topic
@@ -63,9 +68,13 @@ function App() {
          ros: ros,
          name: "/camera/color/image_raw/compressed",
          messageType: "sensor_msgs/CompressedImage",
+         queue_size: 1,
+         throttle_rate: 0
       });
       topic.subscribe((message) => {
-         cameraImage.src = "data:image/jpg;base64," + message.data;
+         if (useCam) {
+            cameraImage.src = "data:image/jpg;base64," + message.data;
+         }
       });
    };
   
@@ -232,6 +241,9 @@ function App() {
    const moveBaseForward = () => {
       offsets_from_center += COLUMNLENGTH/4
           holder_offsets += COLUMNLENGTH/4
+
+      publishBoardOffsetDelta(COLUMNLENGTH/4);
+      publishHolderOffsetDelta(COLUMNLENGTH/4);
   
       executeFollowJointTrajectory(['translate_mobile_base'], [COLUMNLENGTH/4]);
    };
@@ -239,18 +251,21 @@ function App() {
    const moveBaseBackward = () => {
       offsets_from_center -= COLUMNLENGTH/4
           holder_offsets -= COLUMNLENGTH/4
+      
+      publishBoardOffsetDelta(-COLUMNLENGTH/4);
+      publishHolderOffsetDelta(-COLUMNLENGTH/4);
   
       executeFollowJointTrajectory(['translate_mobile_base'], [-COLUMNLENGTH/4]);
    };
 
    const moveArmForward = () => {
       let currPos = jointState['position'][0]
-      executeFollowJointTrajectory(['wrist_extension'], [currPos + ROWLENGTH/4]);
+      executeFollowJointTrajectory(['wrist_extension'], [currPos + ROWLENGTH/2]);
     };
 
    const moveArmBackward = () => {
       let currPos = jointState['position'][0]
-      executeFollowJointTrajectory(['wrist_extension'], [currPos - ROWLENGTH/4]);
+      executeFollowJointTrajectory(['wrist_extension'], [currPos - ROWLENGTH/2]);
    };
 
    const RotateClockwise = () => {
@@ -258,7 +273,7 @@ function App() {
       executeFollowJointTrajectory(['rotate_mobile_base'], [-0.05])
    };
   
-   const RotateCounterClockwise = () => {
+   const RotateCounterClockwise = () => {    
       accumulated_rotation += 0.05
       executeFollowJointTrajectory(['rotate_mobile_base'], [0.05])
    };
@@ -270,6 +285,64 @@ function App() {
    const rotateHeadRelativeCounterclockwise = () => {
     let currPos = jointState['position'][6]
     executeFollowJointTrajectory(['joint_head_pan'], [currPos + 0.1])
+  }
+
+  const pickupTile = () => {
+   let goal = new ROSLIB.ActionGoal({
+      trajectory: {
+        header: { stamp: { secs: 0, nsecs: 0 } },
+        joint_names: ['gripper_aperture', 'joint_lift'],
+        points: [
+        {
+            positions: [GRIPPER_OPEN, NEUTRAL_ELEV],
+            time_from_start: { secs: 1, nsecs: 0 },
+          },
+          {
+            positions: [GRIPPER_OPEN, HOLDERTOP],
+            time_from_start: { secs: 4, nsecs: 0 },
+          },
+          {
+            positions: [GRIPPER_HOLDING,HOLDERTOP
+            ],
+            time_from_start: { secs: 7, nsecs: 0 },
+          },
+          {
+            positions: [GRIPPER_HOLDING,NEUTRAL_ELEV
+            ],
+            time_from_start: { secs: 10, nsecs: 0 },
+          },
+        ],
+      },
+    });
+    trajectoryClient.createClient(goal);
+  }
+
+  const dropTile = () => {
+   let goal = new ROSLIB.ActionGoal({
+      trajectory: {
+        header: { stamp: { secs: 0, nsecs: 0 } },
+        joint_names: ['gripper_aperture', 'joint_lift'],
+        points: [
+        {
+            positions: [GRIPPER_HOLDING , NEUTRAL_ELEV],
+            time_from_start: { secs: 1, nsecs: 0 },
+          },
+          {
+            positions: [GRIPPER_HOLDING, TABLETOP + 0.015],
+            time_from_start: { secs: 4, nsecs: 0 },
+          },
+          {
+            positions: [GRIPPER_OPEN, TABLETOP + 0.015],
+            time_from_start: { secs: 7, nsecs: 0 },
+          },
+          {
+            positions: [GRIPPER_OPEN, NEUTRAL_ELEV],
+            time_from_start: { secs: 9, nsecs: 0 },
+          },
+        ],
+      },
+    });
+    trajectoryClient.createClient(goal);
   }
 
   const rotateHeadRelativeClockwise = () => {
@@ -449,11 +522,15 @@ function App() {
       offsets_from_center = 0;
       accumulated_rotation = 0;
       tabletop_offset = 0;
+
+      publishBoardCalibration(jointState['position'][0]);
    }
   
    const saveHolderCalibration = () => {
       holder_arm = jointState['position'][0];
       holder_offsets = 0;
+
+      publishHolderCalibration(jointState['position'][0]);
    }
 
    // UTILS
@@ -482,14 +559,6 @@ function App() {
    const driveToCenterOfBoardArg = () => {
       driveToCenterOfBoard([0, 2], [1, 3]);
    }
-   
-   // const runScript = () => {
-   //    const pythonProcess = spawn('python',["testPy.py"]);
-
-   //    pythonProcess.stdout.on('data', (data: any) => {
-   //       console.log(data);
-   //    });
-   // }
 
    // INTERFACE THINGS, FOR REAL THIS TIME
    const rawr = new Array(15).fill(null).map(() => new Array(15).fill(""));
@@ -555,6 +624,10 @@ function App() {
       getBoard()
    }
 
+   const playTile = () => {
+      
+   }
+
    const boardPanel = () => {
       if (useCam) {
          return <div style={{transform:'rotate(90deg)', paddingRight:'80px'}} id="camera"><img style={{width: '1200px', height: '1200px', objectFit: 'contain'}} id="cameraImage" /></div>;
@@ -615,15 +688,21 @@ function App() {
             onHeadClockwiseClick={rotateHeadRelativeClockwise}
             onHeadCounterClick={rotateHeadRelativeCounterclockwise}
             onWristLevelClick={SetHandToBase}
+            pickupTile={pickupTile}
+            dropTile={dropTile}
          ></Config>
       } else {
-         return <Moves onBackClick={onBackClick} onOverrideBoardClick={onOverrideBoardClick} onOverrideHandClick={onOverrideHandClick}></Moves>
+         return <Moves onBackClick={onBackClick} 
+                       onOverrideBoardClick={onOverrideBoardClick} 
+                       onOverrideHandClick={onOverrideHandClick}
+                       onPlayTileClick={playTile}
+               ></Moves>
       }
    }
 
 
    const getBoard = () => {
-      fetch('http://localhost:5000/board').then(res => res.json()).then(doBoardResponse);
+      fetch('http://localhost:5001/board').then(res => res.json()).then(doBoardResponse);
    }
 
    const doBoardResponse = (res: Response): void => {
