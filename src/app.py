@@ -1,5 +1,5 @@
 import time
-from flask import Flask, jsonify, make_response
+from flask import Flask, jsonify, make_response, request
 from flask_cors import CORS
 import numpy as np
 from game_state import board
@@ -21,9 +21,17 @@ def get_current_time():
     response.status_code = 200
     return response
     
-@app.route('/board')
+@app.route('/board', methods=['POST'])
 def get_board():
-    response = make_response(jsonify({'board': 'mm mMMMMmmmm board letters yes'}))
+    body = request.get_json()
+    bp = process_board.BoardProcessor()
+    bp.set_image(body['data'])
+    bp.crop_to_board()
+    bp.process_tiles()
+    letter_model = letter_classifier.LetterModelClassifier()
+    letter_model.load()
+    letters = letter_model.classify_all(bp)
+    response = make_response(jsonify({'board': letters}))
     response.status_code = 200
     return response
 
