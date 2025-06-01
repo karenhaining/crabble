@@ -19,6 +19,7 @@ bp.process_tiles()
 # HAND_IMAGE = "./vision/original_data/image.png"
 
 HAND_IMAGE = "./vision/original_data/holder_pics/20250530_164707.jpg"
+# HAND_IMAGE = "./vision/original_data/holder_pics/20250530_164718.jpg"
 # HAND_IMAGE = "./vision/10.jpg"
 
 hp = process_hand.HandProcessor()
@@ -36,5 +37,5 @@ hp.process_tiles()
 
 letter_model = letter_classifier.LetterModelClassifier()
 letter_model.load()
-letters = letter_model.classify_all(bp)
+letters = letter_model.classify_all(hp)
 print(letters)

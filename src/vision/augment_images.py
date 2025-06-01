@@ -142,7 +142,7 @@ def add_blob_noise(img, num_blobs=5, min_radius=1, max_radius=4):
 
         # Create white blob on overlay
         overlay = output.copy()
-        color = (255, 255, 255) if len(img.shape) == 3 else 255
+        color = (0, 0, 0) if len(img.shape) == 3 else 0
         cv2.circle(overlay, (center_x, center_y), radius, color, -1)
 
         # Blend overlay with original
