@@ -25,11 +25,23 @@ class BoardProcessor():
         self.cropped_board = None
         self.board_centroids = [[None for _ in range(config.BOARD_SIZE)] for _ in range(config.BOARD_SIZE)]
 
-    def set_image(self, image):
+    def set_image_from_msg(self, image):
         """
         Sets the image to be processed
         """
-        self.img = cv2.imread(image)
+        np_arr = np.fromstring(image.data.tobytes(), np.uint8)
+        sideways_image = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+        self.img = cv2.rotate(sideways_image, cv2.ROTATE_90_CLOCKWISE)
+
+
+    def set_image_from_file(self, image):
+        """
+        Sets the image to be processed
+        """
+        # self.img = cv2.imread(image)
+        np_arr = np.fromstring(image.tobytes(), np.uint8)
+        sideways_image = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+        self.img = cv2.rotate(sideways_image, cv2.ROTATE_90_CLOCKWISE)
 
     def crop_to_board(self):
         """
@@ -169,8 +181,9 @@ class BoardProcessor():
                 self.board_centroids[i][j] = centroid
 
         # TODO remove debugging
-        cv2.imshow("final image?", draw)
-        cv2.waitKey(0)
+        if config.DEBUG_CROPS:
+            util.display_image(draw, "FINAL IMAGE?")
+
 
 
     def get_thresh(self, x, y):
