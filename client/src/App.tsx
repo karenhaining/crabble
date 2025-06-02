@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import './App.css'
 import Board from './board'
 import Settings from './Settings';
@@ -162,8 +162,9 @@ function App({onBoardCalibClick, onHolderCalibClick, onArmForwardClick, onArmBac
 
    const getBoard = () => {
       const body = {
-         data: 'meow'
+         data: msgData
       }
+      console.log(msgData)
       fetch('http://localhost:5000/board', {method: 'POST', body: JSON.stringify(body), headers: {'Content-Type': 'application/json'}}).then(res => res.json()).then(doBoardResponse);
    }
 
