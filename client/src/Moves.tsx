@@ -1,14 +1,14 @@
 import styles from './boardstyles.module.css'
 import { useState } from 'react';
 
-function Moves({onBackClick, onOverrideBoardClick, onOverrideHandClick} : {onBackClick: () => void, onOverrideBoardClick: (letter: String) => void, onOverrideHandClick: (letter: String) => void}) {
+function Moves({onBackClick, onOverrideBoardClick, onOverrideHandClick, onPlayTileClick} : {onBackClick: () => void, onOverrideBoardClick: (letter: String) => void, onOverrideHandClick: (letter: String) => void, onPlayTileClick: () => void}) {
   const [letter, setLetter] = useState('');
   return (
     <div>
       <div className={styles.menuTitle}>MOVES</div>
       <div className={styles.menuOption}>
         <div className={styles.buttonTitleText}>Play tile from hand</div>
-        <button className={styles.largeButton}>Set</button>
+        <button className={styles.largeButton} onClick={() => onPlayTileClick()}>Set</button>
       </div>
       <div className={styles.menuOption}>
         <div className={styles.buttonTitleText}>Update board state</div>

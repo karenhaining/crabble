@@ -3,14 +3,14 @@ import styles from './boardstyles.module.css'
 function Config({onBackClick, onBoardCalibClick, onHolderCalibClick, onArmForwardClick, onArmBackClick, 
   onBaseLeftClick, onBaseRightClick, onBaseClockwiseClick, onBaseCounterClick, onArucoAlignClick, 
   onParallelParkClick, onReachClick, onBoardCenterClick, onLookDownClick, onHeadClockwiseClick, onHeadCounterClick,
-  onWristLevelClick}:
+  onWristLevelClick, pickupTile, dropTile, MoveToHolderTarget}:
 
   {onBackClick: () => void, onBoardCalibClick: () => void, onHolderCalibClick: () => void, onArmForwardClick: () => void,
     onArmBackClick: () => void, onBaseLeftClick: () => void, onBaseRightClick: () => void, 
     onBaseClockwiseClick: () => void, onBaseCounterClick: () => void, onArucoAlignClick: () => void,
     onParallelParkClick: () => void, onReachClick: () => void, onBoardCenterClick: () => void, 
     onLookDownClick: () => void, onHeadClockwiseClick: () => void, onHeadCounterClick: () => void,
-    onWristLevelClick: () => void}) {
+    onWristLevelClick: () => void, pickupTile: () => void, dropTile: () => void, MoveToHolderTarget: () => void}) {
   return (
     <div>
       <div className={styles.menuTitle}>CONFIG</div>
@@ -71,6 +71,12 @@ function Config({onBackClick, onBoardCalibClick, onHolderCalibClick, onArmForwar
           <br/>
           <br/>
           <button className={styles.largeButton} onClick={onHeadCounterClick}>ROTATE COUNTER</button>
+        </div>
+        <div className={styles.menuOption}>
+        <div className={styles.buttonTitleText}>Tile Controls</div>
+          <button className={styles.largeButton} onClick={pickupTile}>PICKUP TILE</button>
+          <button className={styles.largeButton} onClick={dropTile}>PLACE TILE</button>
+          <button className={styles.largeButton} onClick={MoveToHolderTarget}>MOVE THE ROBOT TO THE SELECTED HOLDER SPACE AND JEFFREY LIKES TEXT ON BUTTONS</button>
         </div>
       </div>
     </div>
