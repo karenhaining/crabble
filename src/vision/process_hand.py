@@ -37,7 +37,7 @@ class HandProcessor():
         """
 
         corners = util.find_corners(self.img, config.BOARD_BL, config.BOARD_BR, 
-                                         config.HOLDER_L, config.HOLDER_R)
+                                         config.HOLDER_BL, config.HOLDER_BR)
 
         temp_height = config.NEW_HAND_PIXELS_HEIGHT + config.MARKER_DIMENSIONS
         dst = np.array([[0,0],
