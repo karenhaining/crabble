@@ -38,10 +38,7 @@ class BoardProcessor():
         """
         Sets the image to be processed
         """
-        # self.img = cv2.imread(image)
-        np_arr = np.fromstring(image.tobytes(), np.uint8)
-        sideways_image = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-        self.img = cv2.rotate(sideways_image, cv2.ROTATE_90_CLOCKWISE)
+        self.img = cv2.imread(image)
 
     def crop_to_board(self):
         """
