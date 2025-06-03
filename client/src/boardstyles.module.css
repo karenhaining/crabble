@@ -5,8 +5,8 @@
 
 .hand { 
   display: grid;
-  grid-template-columns:repeat(1, 65px);
-  grid-template-rows: repeat(7, 65px);
+  grid-template-columns:repeat(2, 80px);
+  grid-template-rows: repeat(7, 80px);
   padding-bottom: 15px;
   justify-content: center;
   padding-right: 75px;
@@ -28,6 +28,7 @@
 
 .gridMarker {
   font-size: 40px;
+  font-weight: bolder;
 }
 
 .zoomButton {

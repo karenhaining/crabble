@@ -15,9 +15,9 @@ from vision import letter_classifier
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
-@app.route('/time')
-def get_current_time():
-    response = make_response(jsonify({'time': time.time()}))
+@app.route('/cat')
+def get_cat_response():
+    response = make_response(jsonify({'cat': 'meow'}))
     response.status_code = 200
     return response
     
@@ -25,7 +25,7 @@ def get_current_time():
 def get_board():
     body = request.get_json()
     bp = process_board.BoardProcessor()
-    bp.set_image(body['data'])
+    bp.set_image_from_msg(body['data'])
     bp.crop_to_board()
     bp.process_tiles()
     letter_model = letter_classifier.LetterModelClassifier()
@@ -35,5 +35,5 @@ def get_board():
     response.status_code = 200
     return response
 
-if __name__ == '__main__':
-    app.run(host= '0.0.0.0', debug=True, port=5001)
+# if __name__ == '__main__':
+#     app.run(host= '0.0.0.0', debug=True, port=5001)

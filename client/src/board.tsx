@@ -35,11 +35,12 @@ const squareContent: Map<string, string> = new Map([
 ]);
 
 function Board(
-  { tiles, overrideBoard, overrideHand, hand, n, showGridMarkers, row, setRow, col, setCol, selRow, setSelRow, selCol, setSelCol, selTile, setSelTile}:
+  { tiles, overrideBoard, overrideHand, hand, n, showGridMarkers, row, setRow, col, setCol, selRow, setSelRow, selCol, setSelCol, selTile, setSelTile, useCam}:
   { tiles: string[][], overrideBoard: string[][], overrideHand: string[], hand: string[], n: number, showGridMarkers: boolean,
     row: number, setRow: (i: number) => void, col: number, setCol: (j: number) => void,
     selRow: number, setSelRow: (i: number) => void, selCol: number, setSelCol: (j: number) => void,
-    selTile: number, setSelTile: (i: number) => void
+    selTile: number, setSelTile: (i: number) => void,
+    useCam: boolean
   }) {
   
   const boardGridSize = (showGridMarkers) ? n + 2 : n;
@@ -104,6 +105,7 @@ function Board(
 
   const handDivs: ReactElement[] = [];
   for (let i = 0; i < 7; i++) {
+    handDivs.push(<div key={'hg' + i} className={styles.gridMarker}>{i + 1}</div>)
     const border = (i == selTile) ? `5px solid red` : `2.5px solid white`;
     if (overrideHand[i] != '-' && overrideHand[i] != '') {
       handDivs.push(
@@ -121,11 +123,11 @@ function Board(
     }
   }
 
-
-  return (
-    <div style={{display: 'flex'}}>
-      <div className={styles.hand} >{handDivs}</div>
-      <div className={styles.gameBoard}>
+  const getBoardView = () => {
+    if (useCam) {
+      return <div></div>;
+    } else {
+      return (<div className={styles.gameBoard}>
         <table><tbody>
           <tr>
           <td></td>
@@ -155,7 +157,15 @@ function Board(
           <td></td>
         </tr>
         </tbody></table>
-      </div>
+      </div>);
+    }
+  }
+
+
+  return (
+    <div style={{display: 'flex'}}>
+      <div className={styles.hand} >{handDivs}</div>
+      {getBoardView()}
     </div>);
 }
 

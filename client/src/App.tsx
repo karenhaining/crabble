@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { ReactElement, useState } from 'react'
 import './App.css'
 import Board from './board'
 import Settings from './Settings';
@@ -86,33 +86,6 @@ function App({onBoardCalibClick, onHolderCalibClick, onArmForwardClick, onArmBac
       
    }
 
-   const boardPanel = () => {
-      if (useCam) {
-         return <div style={{transform:'rotate(90deg)', paddingRight:'80px'}} id="camera"><img style={{width: '1200px', height: '1200px', objectFit: 'cover'}} id="cameraImage" /></div>;
-      } else {
-         return (<div style={{paddingRight:'80px'}}>
-         <Board
-            tiles={tiles}
-            overrideBoard={overrideBoard}
-            overrideHand={overrideHand}
-            hand={hand}
-            n={n}
-            showGridMarkers={showGridMarkers}
-            row={row}
-            setRow={setRow}
-            col={col}
-            setCol={setCol}
-            selRow={selRow}
-            setSelRow={setSelRow}
-            selCol={selCol}
-            setSelCol={setSelCol}
-            selTile={selTile}
-            setSelTile={setSelTile}
-         ></Board>
-      </div>);
-      }
-   }
-
    const menuPanel = () => {
       if (menu === 'MENU') {
          return <Menu onOptionClick={setMenu}></Menu>
@@ -162,21 +135,41 @@ function App({onBoardCalibClick, onHolderCalibClick, onArmForwardClick, onArmBac
 
    const getBoard = () => {
       const body = {
-         data: msgData
+         data: 'meow'
       }
-      console.log(msgData)
-      fetch('http://localhost:5000/board', {method: 'POST', body: JSON.stringify(body), headers: {'Content-Type': 'application/json'}}).then(res => res.json()).then(doBoardResponse);
+      // fetch('http://localhost:5000/cat', {method: 'POST', body: JSON.stringify(body), headers: {'Content-Type': 'application/json'}}).then(res => res.json()).then(doBoardResponse);
+      fetch('http://localhost:5000/cat').then(res => res.json()).then(doBoardResponse);
    }
 
    const doBoardResponse = (res: Response): void => {
-    //console.log(res)
+    console.log(res)
    }
 
 
 return (
    <div style={{display: 'flex'}}>
       <div>
-         {boardPanel()}
+         <div style={{paddingRight:'80px'}}>
+            <Board
+               tiles={tiles}
+               overrideBoard={overrideBoard}
+               overrideHand={overrideHand}
+               hand={hand}
+               n={n}
+               showGridMarkers={showGridMarkers}
+               row={row}
+               setRow={setRow}
+               col={col}
+               setCol={setCol}
+               selRow={selRow}
+               setSelRow={setSelRow}
+               selCol={selCol}
+               setSelCol={setSelCol}
+               selTile={selTile}
+               setSelTile={setSelTile}
+               useCam={useCam}
+            ></Board>
+         </div>
       </div>
       <div>
          {menuPanel()}

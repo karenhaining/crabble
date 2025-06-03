@@ -543,8 +543,17 @@ const createCalibrationPublishers = () => {
       driveToCenterOfBoard([0, 2], [1, 3]);
    }
 
+   const cameraDiv = 
+   <div
+    style={{transform:'rotate(90deg)', paddingRight:'80px'}}
+    id="camera">
+      <img style={{width: '1200px', height: '1200px', objectFit: 'cover'}} id="cameraImage" />
+    </div>
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
+   <div style={{display: 'flex'}}>
+   {cameraDiv}
     <App
       onBoardCalibClick={saveCalibration}
       onHolderCalibClick={saveHolderCalibration}
@@ -566,7 +575,7 @@ createRoot(document.getElementById('root')!).render(
       dropTile={dropTile}
       MoveToHolderTarget={MoveToHolderTarget}
       />
-      <div style={{transform:'rotate(90deg)', paddingRight:'80px'}} id="camera"><img style={{width: '1200px', height: '1200px', objectFit: 'cover'}} id="cameraImage" /></div>
+   </div>
   </StrictMode>
   ,
 )
