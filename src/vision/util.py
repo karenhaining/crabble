@@ -16,8 +16,7 @@ def find_corners(img, tl, tr, bl, br):
     corners, ids, _ = detector.detectMarkers(img)
     ids = np.ndarray.flatten(ids)       # why was this not flattened in the first place???
 
-    # TODO fix this number later
-    if len(ids) < 4:
+    if len(ids) < config.NUM_MARKERS:
         raise Exception("Not enough markers detected!")
 
     # process corners such that it represents the center of the aruco markers
@@ -59,7 +58,6 @@ def get_centroid_rect(c, frac, is_board):
     else:
         letter_size = config.HAND_LETTER_SIZE
 
-
     w = int(letter_size * frac)
     start = (c[0] - int(w/2), c[1] - int(w/2))
     end = (start[0] + w, start[1] + w)
@@ -73,7 +71,6 @@ def get_center(x, y, is_board):
     else:
         letter_size = config.HAND_LETTER_SIZE
         letter_pad_frac = config.HAND_LETTER_PAD_FRAC
-
 
     return (int(letter_size * letter_pad_frac) 
             + int(letter_size/2) + letter_size * x, 
@@ -92,7 +89,6 @@ def get_bounding_rect(x, y, is_board):
             int(letter_size * letter_pad_frac) + letter_size * y)
     end = (start[0] + letter_size, start[1] + letter_size)
     return [start, end]
-
 
 def distance(p1, p2):
     (x1, y1) = p1
