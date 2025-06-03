@@ -1,4 +1,6 @@
 import time
+import base64
+import cv2
 from flask import Flask, jsonify, make_response, request
 from flask_cors import CORS
 import numpy as np
@@ -10,6 +12,11 @@ from vision import config
 from vision import process_hand
 from vision import letter_classifier
 
+# TODO I haven't tested this out yet so not entirely sure it works
+def cv_to_msg(img):
+    _, buffer = cv2.imencode('.jpg', img)
+    jpg_as_text = base64.b64encode(buffer).decode('utf-8')
+    return f'data:image/jpg;base64,{jpg_as_text}'
 
 
 app = Flask(__name__)
@@ -25,7 +32,7 @@ def get_cat_response():
 def get_board():
     body = request.get_json()
     bp = process_board.BoardProcessor()
-    bp.set_image_from_msg(body['data'])
+    bp.set_image_from_msg(body)
     bp.crop_to_board()
     bp.process_tiles()
     letter_model = letter_classifier.LetterModelClassifier()

@@ -134,11 +134,9 @@ function App({onBoardCalibClick, onHolderCalibClick, onArmForwardClick, onArmBac
 
 
    const getBoard = () => {
-      const body = {
-         data: 'meow'
-      }
-      // fetch('http://localhost:5000/cat', {method: 'POST', body: JSON.stringify(body), headers: {'Content-Type': 'application/json'}}).then(res => res.json()).then(doBoardResponse);
-      fetch('http://localhost:5000/cat').then(res => res.json()).then(doBoardResponse);
+      const body = document.getElementById("cameraImage")?.getAttribute("src")
+      console.log(body)
+      fetch('http://localhost:5000/board', {method: 'POST', body: JSON.stringify(body), headers: {'Content-Type': 'application/json'}}).then(res => res.json()).then(doBoardResponse);
    }
 
    const doBoardResponse = (res: Response): void => {

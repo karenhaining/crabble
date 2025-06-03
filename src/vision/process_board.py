@@ -7,6 +7,8 @@
 """
 
 import cv2
+import base64
+
 import numpy as np
 import matplotlib.pyplot as plt
 from vision import util
@@ -25,14 +27,15 @@ class BoardProcessor():
         self.cropped_board = None
         self.board_centroids = [[None for _ in range(config.BOARD_SIZE)] for _ in range(config.BOARD_SIZE)]
 
-    def set_image_from_msg(self, image):
+    def set_image_from_msg(self, msg):
         """
         Sets the image to be processed
         """
-        np_arr = np.fromstring(image.data.tobytes(), np.uint8)
-        sideways_image = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-        self.img = cv2.rotate(sideways_image, cv2.ROTATE_90_CLOCKWISE)
-
+        # Decode the base64 string
+        base64_data = msg.split(',')[1]
+        img_bytes = base64.b64decode(base64_data)
+        img_array = np.frombuffer(img_bytes, dtype=np.uint8)
+        self.img = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
 
     def set_image_from_file(self, image):
         """
