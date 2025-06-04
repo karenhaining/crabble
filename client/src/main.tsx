@@ -123,19 +123,20 @@ const createCalibrationPublishers = () => {
 
    const JOINTNAMES = ["wrist_extension", "joint_lift", "joint_head_pan", "joint_head_tilt",
                      "joint_wrist_yaw", "joint_wrist_pitch", "joint_wrist_roll", "gripper_aperture"]
-  const ROWLENGTH = 0.0190;
-  const HOLDERWIDTH = 0.057
-  const ROWONE = 0.427;
-  const TABLETOP = 0.76313;
-  const NEUTRAL_ELEV = 0.81;
-  const HOLDERTOP = 0.75158;
-  const COLUMNLENGTH = 0.023;
-  const GRIPPER_OPEN = 0.040;
-  const GRIPPER_HOLDING = 0.020;
-  const OFFSET_FOR_BOARD_CENTERING = 1; // TODO: Measure and change this value
-  const ROTATION_OFFSET = 0;//0.075;
-  const PARK_DISTANCE = 1.02;
-  const EPSILON = 0.001;
+   const ROWLENGTH = 0.0190;
+   const HOLDERWIDTH = 0.057
+   const ROWONE = 0.427;
+   const TABLETOP = 0.76313;
+   const NEUTRAL_ELEV = 0.81;
+   const HOLDERTOP = 0.75158;
+   const COLUMNLENGTH = 0.023;
+   const GRIPPER_OPEN = 0.050;
+   const GRIPPER_PLACED = 0.040;
+   const GRIPPER_HOLDING = 0.020;
+   const OFFSET_FOR_BOARD_CENTERING = 1; // TODO: Measure and change this value
+   const ROTATION_OFFSET = 0;//0.075;
+   const PARK_DISTANCE = 1.02;
+   const EPSILON = 0.001;
 
    const executeFollowJointTrajectory = (jointNames:any, jointPositions:any, jointVelocities?:any) => {
       let goal;
@@ -296,11 +297,11 @@ const createCalibrationPublishers = () => {
            time_from_start: { secs: 4, nsecs: 0 },
          },
          {
-           positions: [GRIPPER_OPEN, TABLETOP + 0.015],
+           positions: [GRIPPER_PLACED, TABLETOP + 0.015],
            time_from_start: { secs: 7, nsecs: 0 },
          },
          {
-           positions: [GRIPPER_OPEN, NEUTRAL_ELEV],
+           positions: [GRIPPER_PLACED, NEUTRAL_ELEV],
            time_from_start: { secs: 9, nsecs: 0 },
          },
        ],
