@@ -1,18 +1,9 @@
-import base64
-import cv2
-
 from flask import Flask, jsonify, make_response, request
 from flask_cors import CORS
 
 from vision import process_board
 from vision import process_hand
 from vision import letter_classifier
-
-# TODO I haven't tested this out yet so not entirely sure it works
-def cv_to_msg(img):
-    _, buffer = cv2.imencode('.jpg', img)
-    jpg_as_text = base64.b64encode(buffer).decode('utf-8')
-    return f'data:image/jpg;base64,{jpg_as_text}'
 
 BP = process_board.BoardProcessor()
 HP = process_hand.HandProcessor()
@@ -27,7 +18,7 @@ def handle_exception(e):
     return jsonify(str(e)), 500
     
 @app.route('/board', methods=['POST'])
-def get_board():
+def classify_all():
     body = request.get_json()
 
     try:

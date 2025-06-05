@@ -1,11 +1,3 @@
-"""
-1. Find the Aruco markers of the board (corners)
-2. Unwarp perspective of the entire image using the board
-3. Split into board and hand
-4. Process tiles on board
-5. Process tiles in hand
-"""
-
 import cv2
 import base64
 
