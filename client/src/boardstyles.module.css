@@ -1,20 +1,13 @@
 .gameBoard { 
-  padding-bottom: 15px;
   justify-content: center;
  }
 
 .hand { 
   display: grid;
-  grid-template-columns:repeat(2, 80px);
-  grid-template-rows: repeat(7, 80px);
-  padding-bottom: 15px;
+  grid-template-columns:repeat(2, 60px);
+  grid-template-rows: repeat(7, 60px);
   justify-content: center;
-  padding-right: 75px;
-  padding-top: 75px;
-}
-
-.arrow {
-  font-size: 30px;
+  padding-right: 15px;
 }
 
 .tileLetter {
@@ -31,48 +24,60 @@
   font-weight: bolder;
 }
 
-.zoomButton {
+.buttonLeft {
   font-size: 30px;
   width: 100px;
-  height: 90px;
-}
-
-.zoomText {
-  font-size: 55px;
-  width: 30px;
-  height: 50px;
+  margin-bottom: 10px;
+  margin-right: 25px;
   text-align: center;
-  align-content: center;
 }
 
-.zoomInput {
-  background-color: #414141;
-  display: flex;
+.buttonRight {
+  font-size: 30px;
+  margin-bottom: 10px;
+  width: 100px;
+  text-align: center;
+}
+
+.doubleOption {
   justify-content:space-between;
+  align-items: center;
 }
 
 .mediumButton {
-  padding-top: 20px;
-  padding-bottom: 20px;
   font-size: 20px;
   width: 300px;
 }
 
-.buttonTitleText{
+.optionTitle{
   font-size: 30px;
   text-align: center;
+  font-weight: 500;
+}
+
+.inputTitle{
+  font-size: 30px;
+  text-align: left;
+  padding-left: 15px;
+  font-weight: 500;
 }
 
 .menuTitle{
   font-size: 60px;
   font-weight: bolder;
   text-align: center;
-  border: 2.5px solid white;
+  border: 5px solid light-dark(#213547, rgba(255, 255, 255, 0.87));
+  margin-bottom: 10px;
 }
 
 .menuOption{
-  padding-top: 20px;
-  break-before: auto
+  break-before: auto;
+  align-items: center;
+}
+
+.menuScreen{
+  display: grid;
+  grid-template-columns:repeat(2, 250px);
 }
 
 .multiColDiv {
@@ -80,22 +85,63 @@
 }
 
 .largeButton {
-  padding-top: 15px;
-  padding-bottom: 15px;
+  margin-bottom: 10px;
   font-size: 30px;
-  width: 300px;
-  height: 100;
+  width: 230px;
 }
 
 .smallButton {
+  display: inline-block;
+  margin-bottom: 10px;
   font-size: 30px;
-  height: 115px;
-  width: 145px;
+  width: 170px;
+  margin-left: 15px;
 }
 
-.inputField{
-  font-size: 40px;
-  height: 110px;
-  width: 90px;
+.inputField {
+  font-size: 30px;
+  width: 220px;
+  border: 2.5px solid light-dark(#213547, white);
   text-align: center;
+  margin-bottom: 10px;
+  font-family: inherit;
+  font-weight: 500;
+  color: inherit;
+}
+
+.displayField {
+  font-size: 30px;
+  width: 220px;
+  border: 2.5px solid light-dark(#213547, white);
+  text-align: center;
+  margin-bottom: 10px;
+  font-family: inherit;
+  font-weight: 500;
+  padding-top: 15px;
+  padding-bottom: 15px;
+  background-color: light-dark(#e1e1e1, #1f1f1f);
+  display: inline-block;
+}
+
+.smallInputField {
+  display: inline-block;
+  font-size: 30px;
+  width: 100px;
+  border: 2.5px solid light-dark(#213547, white);
+  text-align: center;
+  margin-bottom: 10px;
+  font-family: inherit;
+  font-weight: 500;
+  color: inherit;
+  margin-left: 12px;
+}
+
+.cameraDiv {
+  transform: rotate(90deg);
+}
+
+.cameraImg {
+  width: 700px;
+  height: 700px;
+  object-fit: cover;
 }

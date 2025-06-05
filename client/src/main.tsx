@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
+import styles from './boardstyles.module.css'
 
 let trajectoryClient: any;
 let jointState: any;
@@ -546,15 +547,14 @@ const createCalibrationPublishers = () => {
 
    const cameraDiv = 
    <div
-    style={{transform:'rotate(90deg)', paddingRight:'80px'}}
+    className={styles.cameraDiv}
     id="camera">
-      <img style={{width: '1200px', height: '1200px', objectFit: 'cover'}} id="cameraImage" />
+      <img className={styles.cameraImg} id="cameraImage" />
     </div>
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
    <div style={{display: 'flex'}}>
-   {cameraDiv}
     <App
       onBoardCalibClick={saveCalibration}
       onHolderCalibClick={saveHolderCalibration}
@@ -576,6 +576,7 @@ createRoot(document.getElementById('root')!).render(
       dropTile={dropTile}
       MoveToHolderTarget={MoveToHolderTarget}
       />
+      {cameraDiv}
    </div>
   </StrictMode>
   ,

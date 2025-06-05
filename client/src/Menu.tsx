@@ -5,15 +5,15 @@ function Menu({onOptionClick} : {onOptionClick: (s: string) => void}) {
     <div>
       <div className={styles.menuTitle}>MENU</div>
       <div className={styles.menuOption}>
-        <div className={styles.buttonTitleText}>View Settings</div>
-        <button className={styles.largeButton} onClick={() => onOptionClick('SETTING')}>OPEN</button>
-      </div>
-      <div className={styles.menuOption}>
-        <div className={styles.buttonTitleText}>Play actions</div>
+        <header className={styles.optionTitle}>Play actions</header>
         <button className={styles.largeButton} onClick={() => onOptionClick('PLAY')}>OPEN</button>
       </div>
       <div className={styles.menuOption}>
-        <div className={styles.buttonTitleText}>Manual config</div>
+        <header className={styles.optionTitle}>View Settings</header>
+        <button className={styles.largeButton} onClick={() => onOptionClick('SETTING')}>OPEN</button>
+      </div>
+      <div className={styles.menuOption}>
+        <header className={styles.optionTitle}>Manual config</header>
         <button className={styles.largeButton} onClick={() => onOptionClick('CONFIG')}>OPEN</button>
       </div>
     </div>

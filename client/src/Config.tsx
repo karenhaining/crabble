@@ -16,22 +16,22 @@ function Config({onBackClick, onBoardCalibClick, onHolderCalibClick, onArmForwar
       <div className={styles.menuTitle}>CONFIG</div>
       <div className={styles.multiColDiv}>
       <div className={styles.menuOption}>
-          <div className={styles.buttonTitleText}>Return to menu</div>
+          <div className={styles.optionTitle}>Return to menu</div>
           <button className={styles.largeButton} onClick={onBackClick}>BACK</button>
         </div>
         <div className={styles.menuOption}>
-          <div className={styles.buttonTitleText}>Save Calibrations</div>
+          <div className={styles.optionTitle}>Save Calibrations</div>
           <button className={styles.largeButton} onClick={onBoardCalibClick}>BOARD CENTER</button>
           <br/>
           <br/>
           <button className={styles.largeButton} onClick={onHolderCalibClick}>HOLDER LEFTMOST</button>
         </div>
         <div className={styles.menuOption}>
-          <div className={styles.buttonTitleText}>Wrist Controls</div>
+          <div className={styles.optionTitle}>Wrist Controls</div>
           <button className={styles.largeButton} onClick={onWristLevelClick}>LEVEL WRIST</button>
         </div>
         <div className={styles.menuOption}>
-          <div className={styles.buttonTitleText}>Position Controls</div>
+          <div className={styles.optionTitle}>Position Controls</div>
           <button className={styles.largeButton} onClick={onArmForwardClick}>ARM FORWARD</button>
           <br/>
           <br/>
@@ -50,7 +50,7 @@ function Config({onBackClick, onBoardCalibClick, onHolderCalibClick, onArmForwar
           <button className={styles.largeButton} onClick={onBaseCounterClick}>BASE COUNTER</button>
         </div>
         <div className={styles.menuOption}>
-          <div className={styles.buttonTitleText}>Alignment Routines</div>
+          <div className={styles.optionTitle}>Alignment Routines</div>
           <button className={styles.largeButton} onClick={onArucoAlignClick}>ARUCO ALIGN</button>
           <br/>
           <br/>
@@ -63,7 +63,7 @@ function Config({onBackClick, onBoardCalibClick, onHolderCalibClick, onArmForwar
           <button className={styles.largeButton} onClick={onBoardCenterClick}>DRIVE TO BOARD CENTER</button>
         </div>
         <div className={styles.menuOption}>
-          <div className={styles.buttonTitleText}>Camera Controls</div>
+          <div className={styles.optionTitle}>Camera Controls</div>
           <button className={styles.largeButton} onClick={onLookDownClick}>LOOK DOWN</button>
           <br/>
           <br/>
@@ -73,7 +73,7 @@ function Config({onBackClick, onBoardCalibClick, onHolderCalibClick, onArmForwar
           <button className={styles.largeButton} onClick={onHeadCounterClick}>ROTATE COUNTER</button>
         </div>
         <div className={styles.menuOption}>
-        <div className={styles.buttonTitleText}>Tile Controls</div>
+        <div className={styles.optionTitle}>Tile Controls</div>
           <button className={styles.largeButton} onClick={pickupTile}>PICKUP TILE</button>
           <button className={styles.largeButton} onClick={dropTile}>PLACE TILE</button>
           <button className={styles.largeButton} onClick={MoveToHolderTarget}>MOVE THE ROBOT TO THE SELECTED HOLDER SPACE AND JEFFREY LIKES TEXT ON BUTTONS</button>

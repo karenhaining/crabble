@@ -28,12 +28,11 @@ function App({onBoardCalibClick, onHolderCalibClick, onArmForwardClick, onArmBac
    rawr[0][1] = 'I';
    const [menu, setMenu] = useState('MENU');
    const [useCam, setUseCam] = useState(false);
-   const [tiles, setTiles] = useState(rawr);
+   const [board, setBoard] = useState(rawr);
    const [hand, setHand] = useState(new Array(7).fill(null).map(() => ""));
    const [overrideBoard, setOverrideBoard] = useState(new Array(15).fill(null).map(() => new Array(15).fill("")));
    const [overrideHand, setOverrideHand] = useState(new Array(7).fill(null).map(() => ""));
-   const [n, setN] = useState(9);
-   const [showGridMarkers, setShowGridMarkers] = useState(true);
+   const [n, setN] = useState(7);
    const [row, setRow] = useState(0);
    const [col, setCol] = useState(0);
    const [selRow, setSelRow] = useState(-1);
@@ -94,11 +93,8 @@ function App({onBoardCalibClick, onHolderCalibClick, onArmForwardClick, onArmBac
             n={n}
             boardMinus={boardMinus}
             boardPlus={boardPlus}
-            showGridMarkers={showGridMarkers}
-            setShowGridMarkers={setShowGridMarkers}
             onBackClick={onBackClick}
             useCam={useCam}
-            onCamToggleClick={onCamToggleClick}
          ></Settings>
       } else if (menu == 'CONFIG'){
          return <Config 
@@ -146,15 +142,16 @@ function App({onBoardCalibClick, onHolderCalibClick, onArmForwardClick, onArmBac
 
 return (
    <div style={{display: 'flex'}}>
+      <div style={{marginRight: '15px'}}>
+         {menuPanel()}
+      </div>
       <div>
-         <div style={{paddingRight:'80px'}}>
-            <Board
-               tiles={tiles}
+         <Board
+               board={board}
                overrideBoard={overrideBoard}
                overrideHand={overrideHand}
                hand={hand}
                n={n}
-               showGridMarkers={showGridMarkers}
                row={row}
                setRow={setRow}
                col={col}
@@ -166,11 +163,8 @@ return (
                selTile={selTile}
                setSelTile={setSelTile}
                useCam={useCam}
+               onCamToggleClick={onCamToggleClick}
             ></Board>
-         </div>
-      </div>
-      <div>
-         {menuPanel()}
       </div>
    </div>
 )
