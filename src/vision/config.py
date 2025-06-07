@@ -25,8 +25,8 @@ NEW_HAND_PIXELS_HEIGHT = 100
 #   MARKERS   #
 ###############
 ARUCO_DICT = cv2.aruco.DICT_6X6_50  # Aruco dictionary type
-NUM_MARKERS = 6                     # total number of markers that should be detected in an image
-
+NUM_MARKERS = 4                     # total number of markers that should be detected in an image
+# TODO fix back!
 BOARD_TL = 0                        # board top left aruco marker id
 BOARD_TR = 1                        # board top right aruco marker id
 BOARD_BL = 2                        # board bottom left aruco marker id
@@ -46,7 +46,7 @@ BOARD_LETTER_CONTOUR_MAX_FRAC = 0.700
 BOARD_LETTER_TEXT_RATIO = 1.4
 BOARD_LETTER_MAX_FILL = 0.65
 BOARD_LETTER_PAD_FRAC = 0.5
-BOARD_LETTER_MAX_SHIFT_FRAC = 0.45
+BOARD_LETTER_MAX_SHIFT_FRAC = 0.4
 BOARD_LETTER_TRAIN_SIZE = 18
 BOARD_LETTER_TRAIN_SUBPIX_FRAC = 0.75
 
@@ -74,4 +74,4 @@ HAND_CONFIDENCE_THRESHOLD = 0.93
 ###############
 DEBUG_CROPS = 0
 DEBUG_HAND_LETTERS = 0
-DEBUG_BOARD_LETTERS = 0
+DEBUG_BOARD_LETTERS = 1

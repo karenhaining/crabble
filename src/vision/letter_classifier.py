@@ -118,6 +118,7 @@ class LetterModelClassifier:
   def __init__(self):
     self._model = LetterClassifier()
     self.mode = None
+    self.board = board.Board()
 
   def load(self):
     # self._model.load_state_dict(torch.load(MODEL_PATH, map_location=torch.device('cpu')))
@@ -137,21 +138,23 @@ class LetterModelClassifier:
   def classify_all(self, finder):
     if isinstance(finder, process_board.BoardProcessor):
       self.mode = "BOARD"
-      letters = board.Board()
       for j in range(0,config.BOARD_SIZE):
         for i in range(0,config.BOARD_SIZE):
           img = finder.get_thresh(i, j)
           if img is None:
+            self.board.add_tile(i, j, '')
             continue
           
           val = self.classify_letter(img)
           if val is not None:
             r, c = val
-            letters.add_tile(i, j, r)
+            self.board.add_tile(i, j, r)
 
             if config.DEBUG_BOARD_LETTERS:
               util.display_image(img, f"LETTER: {r}, {i}, {j}, {c}")
-      return letters
+          else:
+            self.board.add_tile(i, j, '')
+      return self.board
     
     else:
       self.mode = "HAND"
