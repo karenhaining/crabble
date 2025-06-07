@@ -3,7 +3,7 @@ import styles from './boardstyles.module.css'
 function Config({onBackClick, onBoardCalibClick, onHolderCalibClick, onArmForwardClick, onArmBackClick, 
   onBaseLeftClick, onBaseRightClick, onBaseClockwiseClick, onBaseCounterClick, onArucoAlignClick, 
   onParallelParkClick, onReachClick, onBoardCenterClick, onLookDownClick, onHeadClockwiseClick, onHeadCounterClick,
-  onWristLevelClick, pickupTile, dropTile, MoveToHolderTarget, StowArm}:
+  onWristLevelClick, pickupTile, dropTile, MoveToHolderTarget, StowArm, loadCalibration, DeployArm}:
 
   {onBackClick: () => void, onBoardCalibClick: () => void, onHolderCalibClick: () => void, onArmForwardClick: () => void,
     onArmBackClick: () => void, onBaseLeftClick: () => void, onBaseRightClick: () => void, 
@@ -11,7 +11,7 @@ function Config({onBackClick, onBoardCalibClick, onHolderCalibClick, onArmForwar
     onParallelParkClick: () => void, onReachClick: () => void, onBoardCenterClick: () => void, 
     onLookDownClick: () => void, onHeadClockwiseClick: () => void, onHeadCounterClick: () => void,
     onWristLevelClick: () => void, pickupTile: () => void, dropTile: () => void, MoveToHolderTarget: () => void, 
-    StowArm: () => void}) {
+    StowArm: () => void, loadCalibration: () => void, DeployArm: () => void}) {
   return (
     <div>
       <div className={styles.menuTitle}>CONFIG</div>
@@ -26,6 +26,9 @@ function Config({onBackClick, onBoardCalibClick, onHolderCalibClick, onArmForwar
           <br/>
           <br/>
           <button className={styles.largeButton} onClick={onHolderCalibClick}>HOLDER LEFTMOST</button>
+          <br/>
+          <br/>
+          <button className={styles.largeButton} onClick={loadCalibration}>Load Calibration</button>
         </div>
         <div className={styles.menuOption}>
           <div className={styles.optionTitle}>Wrist Controls</div>
@@ -79,6 +82,7 @@ function Config({onBackClick, onBoardCalibClick, onHolderCalibClick, onArmForwar
           <button className={styles.largeButton} onClick={dropTile}>PLACE TILE</button>
           <button className={styles.largeButton} onClick={MoveToHolderTarget}>MOVE TO SELECTED HOLDER SPACE</button>
           <button className={styles.largeButton} onClick={StowArm}>STOW ARM</button>
+          <button className={styles.largeButton} onClick={DeployArm}>DEPLOY ARM</button>
         </div>
       </div>
     </div>

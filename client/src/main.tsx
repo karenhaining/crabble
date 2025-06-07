@@ -27,6 +27,7 @@ ros.on('connection', function() {
   createAlignmentMathClient();
   createCalibrationPublishers();
   subscribeToCameraVideo();
+  subscribeToActions();
 });
 
 // Create subscription to the camera video topic
@@ -117,10 +118,8 @@ const subscribeToActions = () => {
             name: "/stretch_controller/follow_joint_trajectory/_action/status",
             messageType: "action_msgs/msg/GoalStatusArray",
     });
-    console.log("subscribing to actions")
     actionTopic.subscribe((message: any) => {console.log(message);
     if (message.status_list[message.status_list.length - 1].status == 4) {
-      console.log("last completed");  
       queuedMovementsCallback();
     }
     });
@@ -431,11 +430,11 @@ const subscribeToActions = () => {
            time_from_start: { secs: 1, nsecs: 0 },
          },
          {
-           positions: [GRIPPER_HOLDING, TABLETOP + 0.015],
+           positions: [GRIPPER_HOLDING, TABLETOP + 0.005],
            time_from_start: { secs: 4, nsecs: 0 },
          },
          {
-           positions: [GRIPPER_PLACED, TABLETOP + 0.015],
+           positions: [GRIPPER_PLACED, TABLETOP + 0.005],
            time_from_start: { secs: 7, nsecs: 0 },
          },
          {
@@ -742,9 +741,6 @@ const subscribeToActions = () => {
     trajectoryClient.createClient(goal);
   }
 
-  
-  
-
    // CALIBRATION
    const saveCalibration = () => {
       first_row = jointState['position'][0];
@@ -788,6 +784,18 @@ const subscribeToActions = () => {
       driveToCenterOfBoard([0, 2], [1, 3]);
    }
 
+   const loadCalibration = () => {
+    let request = new ROSLIB.ServiceRequest({})
+    let calibration;
+    alignmentMathClient.callService(request, (response:any) => {calibration = response.message;
+      let calibration_array = calibration.split(" ");
+    first_row = parseFloat(calibration_array[0]);
+    offsets_from_center = parseFloat(calibration_array[1]);
+    holder_arm = parseFloat(calibration_array[2]);
+    holder_offsets = parseFloat(calibration_array[3]);
+    });
+   }
+
   const playAction = (action: number[]) => {
     // figure out what we need to to based on the opcode
     switch (action[0]) {
@@ -806,7 +814,7 @@ const subscribeToActions = () => {
       case 4: // drop a tile
         dropTile();
         break;
-      case 5: 
+      case 5:  // deploy
         DeployArm();
         break;
       default: // do nothing if this is an invalid opcode
@@ -848,6 +856,8 @@ createRoot(document.getElementById('root')!).render(
       MoveToHolderTarget={MoveToHolderTarget}
       playAction={playAction}
       StowArm={StowArm}
+      loadCalibration={loadCalibration}
+      DeployArm={DeployArm}
       />
       {cameraDiv}
    </div>

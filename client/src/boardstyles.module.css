@@ -1,5 +1,6 @@
 .gameBoard { 
   justify-content: center;
+  padding-right: 200px;
  }
 
 .hand { 
