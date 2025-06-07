@@ -131,12 +131,12 @@ function App({onBoardCalibClick, onHolderCalibClick, onArmForwardClick, onArmBac
 
    const getBoard = () => {
       const body = document.getElementById("cameraImage")?.getAttribute("src")
-      console.log(body)
       fetch('http://localhost:5000/board', {method: 'POST', body: JSON.stringify(body), headers: {'Content-Type': 'application/json'}}).then(res => res.json()).then(doBoardResponse);
    }
 
    const doBoardResponse = (res: Response): void => {
     console.log(res)
+    setBoard(res.board)
    }
 
 

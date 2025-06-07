@@ -4,7 +4,7 @@ A SIZE by SIZE matrix (15 x 15).
 The origin coordinates (0,0) are in the top left corner of the board.
 """
 
-EMPTY = ' '
+EMPTY = ''
 
 # TODO maybe need a square class to maintain state of:
 #   overwritten letter
@@ -35,3 +35,6 @@ class Board():
             raise Exception(f'{self.board[x][y]} already exists in position ({x}, {y})')
 
         self.board[x][y] = letter
+
+    def get_rep(self):
+        return self.board

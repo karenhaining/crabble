@@ -25,7 +25,7 @@ NEW_HAND_PIXELS_HEIGHT = 100
 #   MARKERS   #
 ###############
 ARUCO_DICT = cv2.aruco.DICT_6X6_50  # Aruco dictionary type
-NUM_MARKERS = 6                     # total number of markers that should be detected in an image
+NUM_MARKERS = 4                     # total number of markers that should be detected in an image
 
 BOARD_TL = 0                        # board top left aruco marker id
 BOARD_TR = 1                        # board top right aruco marker id
