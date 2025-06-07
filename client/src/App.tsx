@@ -215,19 +215,9 @@ function App(
    }
 
    const doBoardResponse = (res: Response): void => {
-      if (res.status === 200) {
-         res.json().then(doBoardJson)
-      }
-   }
-
-   const isRecord = (val: unknown): val is Record<string, unknown> => {
-      return val !== null && typeof val === "object";
-   };
-
-   const doBoardJson = (data: unknown): void => {
-      if (isRecord(data) && typeof data.board === "object" && Array.isArray(data.board)) {
-         setBoard(data.board)
-      }
+      console.log(res)
+      setBoard(res.board)
+      setHand(res.hand)
    }
 
 
