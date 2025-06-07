@@ -85,7 +85,6 @@ function App(
 
    const onCamToggleClick = () => {
       setUseCam(!useCam);
-      getBoard()
    }
 
    // destination: row, column
@@ -201,6 +200,9 @@ function App(
                        onArmUpClick={onArmForwardClick}
                        onArmDownClick={onArmBackClick}
                        queueWord={queueWord}
+                       playNextQueuedAction={playNextQueuedAction}
+                       replayLastAction={replayLastAction}
+                       getBoard={getBoard}
                ></Moves>
       }
    }
@@ -213,7 +215,7 @@ function App(
    }
 
    const doBoardResponse = (res: Response): void => {
-    console.log(res)
+      console.log(res);
    }
 
 

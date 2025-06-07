@@ -5,10 +5,13 @@ import { useState } from 'react';
 function Moves(
   {onBackClick, onOverrideBoardClick, onOverrideHandClick,
    onArmLeftClick, onArmRightClick, onArmUpClick, onArmDownClick,
-   queueWord}:
+   queueWord, playNextQueuedAction, replayLastAction, getBoard}:
   {onBackClick: () => void, onOverrideBoardClick: (letter: String) => void, onOverrideHandClick: (letter: String) => void,
    onArmLeftClick: () => void, onArmRightClick: () => void, onArmUpClick: () => void, onArmDownClick: () => void,
-   queueWord: (r: number, c: number, direction: string, positions: string) => void
+   queueWord: (r: number, c: number, direction: string, positions: string) => void,
+   playNextQueuedAction: () => void,
+   replayLastAction: () => void,
+   getBoard: () => void
   }) {
   const [letter, setLetter] = useState('');
   const [positions, setPositions] = useState('');
@@ -16,7 +19,10 @@ function Moves(
   const [playing, setPlaying] = useState(false);
 
   const onPlay = (dir: string) => {
+    const r = parseInt(location.charAt(1));
+    const c = location.toUpperCase().charCodeAt(0) - 65 + 1;
     setPlaying(true);
+    queueWord(r, c, dir, positions);
   }
 
   const onEndTurn = () => {
@@ -63,7 +69,7 @@ function Moves(
           <button className={styles.largeButton} onClick={onBackClick}>BACK</button>
         </div>
         <div className={styles.menuOption}>
-          <button className={styles.largeButton} onClick={onBackClick}>REFRESH</button>
+          <button className={styles.largeButton} onClick={getBoard}>REFRESH</button>
         </div>
       </div>
       {overrideOption()}
@@ -93,10 +99,10 @@ function Moves(
           <header className={styles.displayField}>NA</header>
         </div>
         <div className={styles.menuOption}>
-          <button className={styles.largeButton} onClick={onBackClick}>NEXT</button>
+          <button className={styles.largeButton} onClick={playNextQueuedAction}>NEXT</button>
         </div>
         <div className={styles.menuOption}>
-          <button className={styles.largeButton} onClick={onBackClick}>RETRY</button>
+          <button className={styles.largeButton} onClick={replayLastAction}>RETRY</button>
         </div>
         <div className={styles.doubleOption}>
             <button className={styles.buttonLeft} onClick={onArmLeftClick}><KeyboardArrowLeft fontSize="large"/></button>

@@ -312,7 +312,7 @@ const subscribeToActions = () => {
         joint_names: ['wrist_extension', 'joint_lift'],
         points: [
         {
-            positions: [0.05, NEUTRAL_ELEV + 0.11],
+            positions: [0.05, NEUTRAL_ELEV + 0.15],
           },
           
         ],
@@ -353,7 +353,7 @@ const subscribeToActions = () => {
         joint_names: ['wrist_extension', 'joint_lift'],
         points: [
         {
-            positions: [0.05, NEUTRAL_ELEV + 0.11,]
+            positions: [0.05, NEUTRAL_ELEV + 0.15,]
           },
           
         ],
