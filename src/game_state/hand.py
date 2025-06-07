@@ -19,3 +19,6 @@ class Hand():
     
     def add_tile(self, letter, idx):
         self.hand[idx] = letter
+
+    def get_rep(self):
+        return self.hand

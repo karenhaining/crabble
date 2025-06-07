@@ -27,17 +27,17 @@ def classify_all():
         BP.crop_to_board()
         BP.process_tiles()
 
-        # HP.clear()
-        # HP.set_image_from_msg(body)
-        # HP.crop_to_hand()
-        # HP.process_tiles()
+        HP.clear()
+        HP.set_image_from_msg(body)
+        HP.crop_to_hand()
+        HP.process_tiles()
 
         board_letters = CLASSIFIER.classify_all(BP).get_rep()
-        # hand_letters = CLASSIFIER.classify_all(HP)
+        hand_letters = CLASSIFIER.classify_all(HP).get_rep()
     except Exception as e:
         raise e
 
-    response = make_response(jsonify({'board': board_letters}))
+    response = make_response(jsonify({'board': board_letters, 'hand': hand_letters}))
     response.status_code = 200
     return response
 

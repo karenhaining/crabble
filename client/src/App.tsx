@@ -214,8 +214,9 @@ function App(
    }
 
    const doBoardResponse = (res: Response): void => {
-      console.log(res);
-    setBoard(res.board)
+      console.log(res)
+      setBoard(res.board)
+      setHand(res.hand)
    }
 
 
