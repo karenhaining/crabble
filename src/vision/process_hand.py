@@ -1,4 +1,5 @@
 import cv2
+import base64
 import numpy as np
 from vision import util
 from vision import config
@@ -16,13 +17,15 @@ class HandProcessor():
         self.cropped_hand = None
         self.hand_centroids = [None for _ in range(config.HAND_SIZE)]
     
-    def set_image_from_msg(self, image):
+    def set_image_from_msg(self, msg):
         """
         Sets the image to be processed
         """
-        np_arr = np.fromstring(image.data.tobytes(), np.uint8)
-        sideways_image = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-        self.img = cv2.rotate(sideways_image, cv2.ROTATE_90_CLOCKWISE)
+        # Decode the base64 string
+        base64_data = msg.split(',')[1]
+        img_bytes = base64.b64decode(base64_data)
+        img_array = np.frombuffer(img_bytes, dtype=np.uint8)
+        self.img = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
 
 
     def set_image_from_file(self, image):
