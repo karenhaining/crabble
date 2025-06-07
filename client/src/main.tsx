@@ -250,14 +250,6 @@ const subscribeToActions = () => {
       holderOffsetTopic.publish(msg);
    }
 
-   // vision node wrapper function
-   /*const getBoardState = () => {
-      let request = new ROSLIB.ServiceRequest({})
-      visionNodeClient.callService(request, (response: any) => {boardState = response});
-      console.log(boardState);
-      return boardState;
-   }*/
-
    // FUNCTIONS THAT MOVE THE ROBOT
    const moveBaseForward = () => {
       let delta = COLUMNLENGTH/4;
@@ -675,6 +667,84 @@ const subscribeToActions = () => {
     executeFollowJointTrajectory(['wrist_extension', 'translate_mobile_base'], [wrist_target, drive_target]);
   }
 
+  const StowArmAndDriveToCenter = () => {
+    let goal = new ROSLIB.ActionGoal({
+      trajectory: {
+        header: { stamp: { secs: 0, nsecs: 0 } },
+        joint_names: ['wrist_extension', 'joint_lift'],
+        points: [
+        {
+            positions: [0.05, NEUTRAL_ELEV + 0.1,],
+          },
+          
+        ],
+      },
+
+    });
+
+    queuedMovements.push(
+      {
+        header: { stamp: { secs: 0, nsecs: 0 } },
+        joint_names: ['wrist_extension', 'joint_lift'],
+        points: [
+        {
+            positions: [0.05, NEUTRAL_ELEV + 0.15],
+          },
+          
+        ],
+      }
+    )
+    queuedMovements.push(
+      {
+        header: { stamp: { secs: 0, nsecs: 0 } },
+        joint_names: ['joint_wrist_pitch'],
+        points: [
+        {
+            positions: [ -1.5],
+          },
+          
+        ],
+      }
+    )
+
+    queuedMovements.push(
+      {
+        header: { stamp: { secs: 0, nsecs: 0 } },
+        joint_names: ['wrist_extension', 'joint_lift',],
+        points: [
+        {
+            positions: [0.05, NEUTRAL_ELEV - 0.3, ],
+          },
+          
+        ],
+      }
+    )
+
+    
+    let driveDistance = -1 * offsets_from_center
+    offsets_from_center += driveDistance;
+    holder_offsets += driveDistance;
+    publishBoardOffsetDelta(driveDistance);
+    publishHolderOffsetDelta(driveDistance)
+    
+    queuedMovements.push(
+      {
+        header: { stamp: { secs: 0, nsecs: 0 } },
+        joint_names: ['translate_mobile_base',],
+        points: [
+        {
+            positions: [driveDistance],
+          },
+          
+        ],
+      }
+    )
+    trajectoryClient.createClient(goal);
+  }
+
+  
+  
+
    // CALIBRATION
    const saveCalibration = () => {
       first_row = jointState['position'][0];
@@ -722,7 +792,7 @@ const subscribeToActions = () => {
     // figure out what we need to to based on the opcode
     switch (action[0]) {
       case 0: // stow the arm
-        StowArm();
+        StowArmAndDriveToCenter();
         break;
       case 1: // go to holder position
         MoveToHolderTarget(action[1]);
@@ -777,6 +847,7 @@ createRoot(document.getElementById('root')!).render(
       dropTile={dropTile}
       MoveToHolderTarget={MoveToHolderTarget}
       playAction={playAction}
+      StowArm={StowArm}
       />
       {cameraDiv}
    </div>

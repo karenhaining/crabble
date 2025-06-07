@@ -11,7 +11,7 @@ function App(
     onBaseLeftClick, onBaseRightClick, onBaseClockwiseClick, onBaseCounterClick, onArucoAlignClick, 
     onParallelParkClick, onReachClick, onBoardCenterClick, onLookDownClick, onHeadClockwiseClick, onHeadCounterClick,
     onWristLevelClick, pickupTile, dropTile, MoveToHolderTarget,
-    playAction
+    playAction, StowArm
    }:
 
    {onBoardCalibClick: () => void, onHolderCalibClick: () => void, onArmForwardClick: () => void,
@@ -20,7 +20,7 @@ function App(
     onParallelParkClick: () => void, onReachClick: () => void, onBoardCenterClick: () => void, 
     onLookDownClick: () => void, onHeadClockwiseClick: () => void, onHeadCounterClick: () => void,
     onWristLevelClick: () => void, pickupTile: () => void, dropTile: () => void, MoveToHolderTarget: (target: number) => void,
-    playAction: (action: number[]) => void
+    playAction: (action: number[]) => void, StowArm: () => void
    }) {
    
    // INTERFACE THINGS, FOR REAL THIS TIME
@@ -190,6 +190,7 @@ function App(
             pickupTile={pickupTile}
             dropTile={dropTile}
             MoveToHolderTarget={() => {MoveToHolderTarget(selTile)}}
+            StowArm={StowArm}
          ></Config>
       } else {
          return <Moves onBackClick={onBackClick} 
@@ -210,12 +211,23 @@ function App(
 
    const getBoard = () => {
       const body = document.getElementById("cameraImage")?.getAttribute("src")
-      fetch('http://localhost:5000/board', {method: 'POST', body: JSON.stringify(body), headers: {'Content-Type': 'application/json'}}).then(res => res.json()).then(doBoardResponse);
+      fetch('http://localhost:5000/board', {method: 'POST', body: JSON.stringify(body), headers: {'Content-Type': 'application/json'}}).then(doBoardResponse);
    }
 
    const doBoardResponse = (res: Response): void => {
-      console.log(res);
-    setBoard(res.board)
+      if (res.status === 200) {
+         res.json().then(doBoardJson)
+      }
+   }
+
+   const isRecord = (val: unknown): val is Record<string, unknown> => {
+      return val !== null && typeof val === "object";
+   };
+
+   const doBoardJson = (data: unknown): void => {
+      if (isRecord(data) && typeof data.board === "object" && Array.isArray(data.board)) {
+         setBoard(data.board)
+      }
    }
 
 

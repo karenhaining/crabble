@@ -3,14 +3,15 @@ import styles from './boardstyles.module.css'
 function Config({onBackClick, onBoardCalibClick, onHolderCalibClick, onArmForwardClick, onArmBackClick, 
   onBaseLeftClick, onBaseRightClick, onBaseClockwiseClick, onBaseCounterClick, onArucoAlignClick, 
   onParallelParkClick, onReachClick, onBoardCenterClick, onLookDownClick, onHeadClockwiseClick, onHeadCounterClick,
-  onWristLevelClick, pickupTile, dropTile, MoveToHolderTarget}:
+  onWristLevelClick, pickupTile, dropTile, MoveToHolderTarget, StowArm}:
 
   {onBackClick: () => void, onBoardCalibClick: () => void, onHolderCalibClick: () => void, onArmForwardClick: () => void,
     onArmBackClick: () => void, onBaseLeftClick: () => void, onBaseRightClick: () => void, 
     onBaseClockwiseClick: () => void, onBaseCounterClick: () => void, onArucoAlignClick: () => void,
     onParallelParkClick: () => void, onReachClick: () => void, onBoardCenterClick: () => void, 
     onLookDownClick: () => void, onHeadClockwiseClick: () => void, onHeadCounterClick: () => void,
-    onWristLevelClick: () => void, pickupTile: () => void, dropTile: () => void, MoveToHolderTarget: () => void}) {
+    onWristLevelClick: () => void, pickupTile: () => void, dropTile: () => void, MoveToHolderTarget: () => void, 
+    StowArm: () => void}) {
   return (
     <div>
       <div className={styles.menuTitle}>CONFIG</div>
@@ -76,7 +77,8 @@ function Config({onBackClick, onBoardCalibClick, onHolderCalibClick, onArmForwar
         <div className={styles.optionTitle}>Tile Controls</div>
           <button className={styles.largeButton} onClick={pickupTile}>PICKUP TILE</button>
           <button className={styles.largeButton} onClick={dropTile}>PLACE TILE</button>
-          <button className={styles.largeButton} onClick={MoveToHolderTarget}>MOVE THE ROBOT TO THE SELECTED HOLDER SPACE AND JEFFREY LIKES TEXT ON BUTTONS</button>
+          <button className={styles.largeButton} onClick={MoveToHolderTarget}>MOVE TO SELECTED HOLDER SPACE</button>
+          <button className={styles.largeButton} onClick={StowArm}>STOW ARM</button>
         </div>
       </div>
     </div>

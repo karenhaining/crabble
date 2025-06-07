@@ -19,6 +19,7 @@ function Moves(
   const [playing, setPlaying] = useState(false);
 
   const onPlay = (dir: string) => {
+    getBoard()
     const r = parseInt(location.charAt(1));
     const c = location.toUpperCase().charCodeAt(0) - 65 + 1;
     setPlaying(true);
