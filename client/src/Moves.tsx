@@ -2,16 +2,21 @@ import { KeyboardArrowDown, KeyboardArrowLeft, KeyboardArrowRight, KeyboardArrow
 import styles from './boardstyles.module.css'
 import { useState } from 'react';
 
-function Moves({onBackClick, onOverrideBoardClick, onOverrideHandClick, onPlayTileClick} : {onBackClick: () => void, onOverrideBoardClick: (letter: String) => void, onOverrideHandClick: (letter: String) => void, onPlayTileClick: () => void}) {
+function Moves(
+  {onBackClick, onOverrideBoardClick, onOverrideHandClick,
+   onArmLeftClick, onArmRightClick, onArmUpClick, onArmDownClick,
+   queueWord}:
+  {onBackClick: () => void, onOverrideBoardClick: (letter: String) => void, onOverrideHandClick: (letter: String) => void,
+   onArmLeftClick: () => void, onArmRightClick: () => void, onArmUpClick: () => void, onArmDownClick: () => void,
+   queueWord: (r: number, c: number, direction: string, positions: string) => void
+  }) {
   const [letter, setLetter] = useState('');
+  const [positions, setPositions] = useState('');
+  const [location, setLocation] = useState('');
   const [playing, setPlaying] = useState(false);
 
-  const onPlayDown = () => {
-    setPlaying(true)
-  }
-
-  const onPlayAcross = () => {
-    setPlaying(true)
+  const onPlay = (dir: string) => {
+    setPlaying(true);
   }
 
   const onEndTurn = () => {
@@ -24,8 +29,8 @@ function Moves({onBackClick, onOverrideBoardClick, onOverrideHandClick, onPlayTi
     } else {
       return (
         <div className={styles.doubleOption}>
-          <button className={styles.buttonLeft} onClick={onPlayDown}>D</button>
-          <button className={styles.buttonRight} onClick={onPlayAcross}>A</button>
+          <button className={styles.buttonLeft} onClick={() => onPlay('D')}>D</button>
+          <button className={styles.buttonRight} onClick={() => onPlay('A')}>A</button>
         </div>
       )
     }
@@ -33,18 +38,21 @@ function Moves({onBackClick, onOverrideBoardClick, onOverrideHandClick, onPlayTi
 
   const overrideOption = () => {
     if (playing) {
-      return [];
+      return <div></div>
     } else {
-      return [
+      return (
       <div className={styles.menuOption} key={'overrride'}>
         <header className={styles.inputTitle}>Override tile:</header>
         <div style={{display: 'flex'}}>
-          <input className={styles.smallInputField}></input>
-            <button className={styles.smallButton} onClick={() => onOverrideHandClick(letter)}>Hand</button>
-            <button className={styles.smallButton} onClick={() => onOverrideBoardClick(letter)}>Board</button>
+          <input
+            className={styles.smallInputField}
+            maxLength={1}
+            value={letter}
+            onChange={(e) => {setLetter(e.target.value)}}></input>
+          <button className={styles.smallButton} onClick={() => onOverrideHandClick(letter)}>Hand</button>
+          <button className={styles.smallButton} onClick={() => onOverrideBoardClick(letter)}>Board</button>
         </div>
-      </div>,
-      <div key={'filler'}></div>];
+      </div>);
     }
   }
   return (
@@ -57,14 +65,24 @@ function Moves({onBackClick, onOverrideBoardClick, onOverrideHandClick, onPlayTi
         <div className={styles.menuOption}>
           <button className={styles.largeButton} onClick={onBackClick}>REFRESH</button>
         </div>
-        {overrideOption()}
+      </div>
+      {overrideOption()}
+      <div className={styles.menuScreen}>
         <div className={styles.menuOption}>
           <header className={styles.inputTitle}>Word:</header>
-          <input className={styles.inputField}></input>
+          <input
+            className={styles.inputField}
+            onChange={(e) => setPositions(e.target.value)}
+            value={positions}>
+          </input>
         </div>
         <div className={styles.menuOption}>
           <header className={styles.inputTitle}>Board Location:</header>
-          <input className={styles.inputField}></input>
+          <input
+            className={styles.inputField}
+            onChange={(e) => setLocation(e.target.value)}
+            value={location}>
+          </input>
         </div>
         <div className={styles.menuOption}>
           <header className={styles.inputTitle}>Play:</header>
@@ -81,12 +99,12 @@ function Moves({onBackClick, onOverrideBoardClick, onOverrideHandClick, onPlayTi
           <button className={styles.largeButton} onClick={onBackClick}>RETRY</button>
         </div>
         <div className={styles.doubleOption}>
-            <button className={styles.buttonLeft} onClick={onBackClick}><KeyboardArrowLeft fontSize="large"/></button>
-            <button className={styles.buttonRight} onClick={onBackClick}><KeyboardArrowRight fontSize="large"/></button>
+            <button className={styles.buttonLeft} onClick={onArmLeftClick}><KeyboardArrowLeft fontSize="large"/></button>
+            <button className={styles.buttonRight} onClick={onArmRightClick}><KeyboardArrowRight fontSize="large"/></button>
         </div>
         <div className={styles.doubleOption}>
-            <button className={styles.buttonLeft} onClick={onBackClick}><KeyboardArrowDown fontSize="large"/></button>
-            <button className={styles.buttonRight} onClick={onBackClick}><KeyboardArrowUp fontSize="large"/></button>
+            <button className={styles.buttonLeft} onClick={onArmUpClick}><KeyboardArrowUp fontSize="large"/></button>
+            <button className={styles.buttonRight} onClick={onArmDownClick}><KeyboardArrowDown fontSize="large"/></button>
         </div>
       </div>
     </div>

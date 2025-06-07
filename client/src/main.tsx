@@ -111,6 +111,32 @@ const createCalibrationPublishers = () => {
   });
 }
 
+const subscribeToActions = () => {
+    const actionTopic = new ROSLIB.Topic({
+            ros: ros,
+            name: "/stretch_controller/follow_joint_trajectory/_action/status",
+            messageType: "action_msgs/msg/GoalStatusArray",
+    });
+    console.log("subscribing to actions")
+    actionTopic.subscribe((message: any) => {console.log(message);
+    if (message.status_list[message.status_list.length - 1].status == 4) {
+      console.log("last completed");  
+      queuedMovementsCallback();
+    }
+    });
+  }
+
+  const queuedMovementsCallback = () => {
+    if (queuedMovements.length > 0) {
+      let nextGoal = queuedMovements.shift()
+      let goal = new ROSLIB.ActionGoal({
+        trajectory: nextGoal
+    });
+
+       trajectoryClient.createClient(goal);
+      }
+  }
+
 // global state variables
    let calibration: string = "";
 
@@ -121,6 +147,11 @@ const createCalibrationPublishers = () => {
    let tabletop_offset: any = 0;
    let holder_offsets: any = 0;
    let holder_arm: any = 0;
+   let queuedMovements: any = [];
+
+   const action_queue:any = [];
+   let lastPlayedAction = [-1, -1, -1];
+
 
    const JOINTNAMES = ["wrist_extension", "joint_lift", "joint_head_pan", "joint_head_tilt",
                      "joint_wrist_yaw", "joint_wrist_pitch", "joint_wrist_roll", "gripper_aperture"]
@@ -179,10 +210,16 @@ const createCalibrationPublishers = () => {
 
    // Calibration wrapper functions
    const getCalibrationData = () => {
-      let request = new ROSLIB.ServiceRequest({});
-      alignmentMathClient.callService(request, (response: any) => {calibration = response});
-      console.log(calibration);
-      return calibration;
+      let request = new ROSLIB.ServiceRequest({})
+      let calibration;
+      alignmentMathClient.callService(request, (response: any) => {
+         calibration = response.message;
+         let calibration_array = calibration.split(" ");
+         first_row = parseFloat(calibration_array[0]);
+         offsets_from_center = parseFloat(calibration_array[1]);
+         holder_arm = parseFloat(calibration_array[2]);
+         holder_offsets = parseFloat(calibration_array[3]);
+    });
    }
   
    const publishBoardCalibration = (value: number) => {
@@ -214,26 +251,33 @@ const createCalibrationPublishers = () => {
    }
 
    // vision node wrapper function
-   const getBoardState = () => {
+   /*const getBoardState = () => {
       let request = new ROSLIB.ServiceRequest({})
       visionNodeClient.callService(request, (response: any) => {boardState = response});
       console.log(boardState);
       return boardState;
-   }
+   }*/
 
    // FUNCTIONS THAT MOVE THE ROBOT
    const moveBaseForward = () => {
-      offsets_from_center += COLUMNLENGTH/4
-          holder_offsets += COLUMNLENGTH/4
-  
-      executeFollowJointTrajectory(['translate_mobile_base'], [COLUMNLENGTH/4]);
+      let delta = COLUMNLENGTH/4;
+      offsets_from_center += delta;
+      holder_offsets += delta;
+
+      publishHolderOffsetDelta(delta)
+      publishBoardOffsetDelta(delta)
+      executeFollowJointTrajectory(['translate_mobile_base'], [delta]);
    };
 
    const moveBaseBackward = () => {
-      offsets_from_center -= COLUMNLENGTH/4
-          holder_offsets -= COLUMNLENGTH/4
+      let delta = -1 * COLUMNLENGTH/4;
+      offsets_from_center += delta;
+      holder_offsets += delta;
   
-      executeFollowJointTrajectory(['translate_mobile_base'], [-COLUMNLENGTH/4]);
+      publishHolderOffsetDelta(delta)
+      publishBoardOffsetDelta(delta)
+  
+      executeFollowJointTrajectory(['translate_mobile_base'], [delta]);
    };
 
    const moveArmForward = () => {
@@ -245,6 +289,107 @@ const createCalibrationPublishers = () => {
       let currPos = jointState['position'][0]
       executeFollowJointTrajectory(['wrist_extension'], [currPos - ROWLENGTH/4]);
    };
+
+
+  const StowArm = () => {
+    let goal = new ROSLIB.ActionGoal({
+      trajectory: {
+        header: { stamp: { secs: 0, nsecs: 0 } },
+        joint_names: ['wrist_extension', 'joint_lift'],
+        points: [
+        {
+            positions: [0.05, NEUTRAL_ELEV + 0.1,],
+          },
+          
+        ],
+      },
+
+    });
+
+    queuedMovements.push(
+      {
+        header: { stamp: { secs: 0, nsecs: 0 } },
+        joint_names: ['wrist_extension', 'joint_lift'],
+        points: [
+        {
+            positions: [0.05, NEUTRAL_ELEV + 0.11],
+          },
+          
+        ],
+      }
+    )
+    queuedMovements.push(
+      {
+        header: { stamp: { secs: 0, nsecs: 0 } },
+        joint_names: ['joint_wrist_pitch'],
+        points: [
+        {
+            positions: [ -1.5],
+          },
+          
+        ],
+      }
+    )
+
+    queuedMovements.push(
+      {
+        header: { stamp: { secs: 0, nsecs: 0 } },
+        joint_names: ['wrist_extension', 'joint_lift',],
+        points: [
+        {
+            positions: [0.05, NEUTRAL_ELEV - 0.3, ],
+          },
+          
+        ],
+      }
+    )
+    trajectoryClient.createClient(goal);
+  }
+
+  const DeployArm = () => {
+    let goal = new ROSLIB.ActionGoal({
+      trajectory: {
+        header: { stamp: { secs: 0, nsecs: 0 } },
+        joint_names: ['wrist_extension', 'joint_lift'],
+        points: [
+        {
+            positions: [0.05, NEUTRAL_ELEV + 0.11,]
+          },
+          
+        ],
+      },
+
+    });
+
+   
+    queuedMovements.push(
+      {
+        header: { stamp: { secs: 0, nsecs: 0 } },
+        joint_names: ['joint_wrist_pitch'],
+        points: [
+        {
+            positions: [0],
+          },
+          
+        ],
+      }
+    )
+
+    queuedMovements.push(
+      {
+        header: { stamp: { secs: 0, nsecs: 0 } },
+        joint_names: ['wrist_extension', 'joint_lift',],
+        points: [
+        {
+            positions: [0.15, NEUTRAL_ELEV],
+          },
+          
+        ],
+      }
+    )
+        trajectoryClient.createClient(goal);
+
+  }
 
    const RotateClockwise = () => {
       accumulated_rotation += -0.05
@@ -501,9 +646,34 @@ const createCalibrationPublishers = () => {
       markerPositionAvg_right = markerPositionAvg_right / marker_indices_right.length
       markerPositionAvg_left = markerPositionAvg_left / marker_indices_left.length
       let horizontalOffset = (markerPositionAvg_left + markerPositionAvg_right) / 2
-      //horizontalOffset = -horizontalOffset
+
+      offsets_from_center += horizontalOffset;
+      holder_offsets += horizontalOffset;
+      publishBoardOffsetDelta(horizontalOffset);
+      publishHolderOffsetDelta(horizontalOffset);
+
       executeFollowJointTrajectory(['translate_mobile_base',], [horizontalOffset]);
    }
+
+   const moveGripperToTarget = (row: number, column: number) => {
+    if (row > 15 || row < 1) {
+      console.log("Bad row");
+      return;
+    }
+    if (column > 15 || column < 1) {
+      console.log("bad column");
+      return;
+    }
+
+    let wrist_target = first_row - (ROWLENGTH * (row - 1));
+    let drive_target = (COLUMNLENGTH * (8 - column)) - offsets_from_center;
+    offsets_from_center += drive_target
+    holder_offsets += drive_target
+
+    publishBoardOffsetDelta(drive_target);
+    publishHolderOffsetDelta(drive_target);
+    executeFollowJointTrajectory(['wrist_extension', 'translate_mobile_base'], [wrist_target, drive_target]);
+  }
 
    // CALIBRATION
    const saveCalibration = () => {
@@ -511,11 +681,14 @@ const createCalibrationPublishers = () => {
       offsets_from_center = 0;
       accumulated_rotation = 0;
       tabletop_offset = 0;
+      publishBoardCalibration(first_row);
    }
   
    const saveHolderCalibration = () => {
       holder_arm = jointState['position'][0];
       holder_offsets = 0;
+      publishHolderCalibration(holder_arm);
+
    }
 
    // UTILS
@@ -544,6 +717,34 @@ const createCalibrationPublishers = () => {
    const driveToCenterOfBoardArg = () => {
       driveToCenterOfBoard([0, 2], [1, 3]);
    }
+
+  const playAction = (action: number[]) => {
+    // figure out what we need to to based on the opcode
+    switch (action[0]) {
+      case 0: // stow the arm
+        StowArm();
+        break;
+      case 1: // go to holder position
+        MoveToHolderTarget(action[1]);
+        break;
+      case 2: // go to board position
+        moveGripperToTarget(action[1], action[2]);
+        break; 
+      case 3: // pick up a tile
+        pickupTile();
+        break;
+      case 4: // drop a tile
+        dropTile();
+        break;
+      case 5: 
+        DeployArm();
+        break;
+      default: // do nothing if this is an invalid opcode
+        break;
+    }
+    console.log("Played action " + action);
+  }
+
 
    const cameraDiv = 
    <div
@@ -575,6 +776,7 @@ createRoot(document.getElementById('root')!).render(
       pickupTile={pickupTile}
       dropTile={dropTile}
       MoveToHolderTarget={MoveToHolderTarget}
+      playAction={playAction}
       />
       {cameraDiv}
    </div>

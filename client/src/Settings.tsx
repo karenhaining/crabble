@@ -1,7 +1,7 @@
 import styles from './boardstyles.module.css'
 
-function Settings({n, boardMinus, boardPlus, useCam, onBackClick}:
-  {n: number, boardMinus: () => void, boardPlus: () => void, useCam: boolean, onBackClick: () => void}) {
+function Settings({n, boardMinus, boardPlus, onBackClick}:
+  {n: number, boardMinus: () => void, boardPlus: () => void, onBackClick: () => void}) {
   return (
     <div>
       <header className={styles.menuTitle}>SETTINGS</header>

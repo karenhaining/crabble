@@ -6,17 +6,22 @@ import Moves from './Moves';
 import Menu from './Menu';
 import Config from './Config'
 
-function App({onBoardCalibClick, onHolderCalibClick, onArmForwardClick, onArmBackClick, 
-  onBaseLeftClick, onBaseRightClick, onBaseClockwiseClick, onBaseCounterClick, onArucoAlignClick, 
-  onParallelParkClick, onReachClick, onBoardCenterClick, onLookDownClick, onHeadClockwiseClick, onHeadCounterClick,
-  onWristLevelClick, pickupTile, dropTile, MoveToHolderTarget}:
+function App(
+   {onBoardCalibClick, onHolderCalibClick, onArmForwardClick, onArmBackClick, 
+    onBaseLeftClick, onBaseRightClick, onBaseClockwiseClick, onBaseCounterClick, onArucoAlignClick, 
+    onParallelParkClick, onReachClick, onBoardCenterClick, onLookDownClick, onHeadClockwiseClick, onHeadCounterClick,
+    onWristLevelClick, pickupTile, dropTile, MoveToHolderTarget,
+    playAction
+   }:
 
-  {onBoardCalibClick: () => void, onHolderCalibClick: () => void, onArmForwardClick: () => void,
+   {onBoardCalibClick: () => void, onHolderCalibClick: () => void, onArmForwardClick: () => void,
     onArmBackClick: () => void, onBaseLeftClick: () => void, onBaseRightClick: () => void, 
     onBaseClockwiseClick: () => void, onBaseCounterClick: () => void, onArucoAlignClick: () => void,
     onParallelParkClick: () => void, onReachClick: () => void, onBoardCenterClick: () => void, 
     onLookDownClick: () => void, onHeadClockwiseClick: () => void, onHeadCounterClick: () => void,
-    onWristLevelClick: () => void, pickupTile: () => void, dropTile: () => void, MoveToHolderTarget: (target: number) => void}) {
+    onWristLevelClick: () => void, pickupTile: () => void, dropTile: () => void, MoveToHolderTarget: (target: number) => void,
+    playAction: (action: number[]) => void
+   }) {
    
    // INTERFACE THINGS, FOR REAL THIS TIME
    const rawr = new Array(15).fill(null).map(() => new Array(15).fill(""));
@@ -38,6 +43,8 @@ function App({onBoardCalibClick, onHolderCalibClick, onArmForwardClick, onArmBac
    const [selRow, setSelRow] = useState(-1);
    const [selCol, setSelCol] = useState(-1);
    const [selTile, setSelTile] = useState(-1);
+   const [actionQueue, setActionQueue] = useState([[-1, -1, -1]]);
+   const [lastPlayedAction, setLastPlayedAction] = useState([-1, -1, -1]);
 
    const boardMinus = () => {
       if (n > 3) {
@@ -81,8 +88,75 @@ function App({onBoardCalibClick, onHolderCalibClick, onArmForwardClick, onArmBac
       getBoard()
    }
 
-   const playTile = () => {
-      
+   // destination: row, column
+   // direction: R or D
+   // holder positions: series of numbers from 1-7, inclusive, or . to indicate no letter played
+   const queueWord = (r: number, c: number, direction: string, positions: string) => {
+      // only queue a word if the action queue is not empty
+      const newActionQueue = [];
+
+      // at the beginning of the queue, ready the arm
+      newActionQueue.push([5, 0, 0]);
+
+      console.log("QUEUEING:");
+      console.log("Row: " + r);
+      console.log("Column: " + c);
+      console.log("Direction: " + direction);
+      console.log("Positions: " + positions);
+
+      // QUEUE FORMAT:
+      // each element is a tuple [type, coord1, coord2]
+      // type: if 0, stow. ignore other coords
+      //       if 1, go to holder position defined in coord1
+      //       if 2, go to board position defined as row = coord1, col = coord2
+      //       if 3, pick up a tile (assumed to be over the holder)
+      //       if 4, place a tile (assumed to be over the board)
+      //       if 5, ready the arm
+
+      // loop through the holder positions given 
+      for (let char of positions) {
+         // get the holder slot. remember it might be a '.' to indicate that 
+         // the tile is already on the board there
+         let slot = parseInt(char);
+
+         // only add goals for picking up and placing a tile if we're not over a '.'
+         if (!isNaN(slot)) {
+            // move to the holder position
+            newActionQueue.push([1, slot, 0])
+            // pick up tile 
+            newActionQueue.push([3, 0, 0])
+            // move to the board location
+            newActionQueue.push([2, r, c])
+            // place tile
+            newActionQueue.push([4, 0, 0])
+         }
+         // always increment the row/col
+         if (direction == "D") {
+            r++;
+         } else {
+            c++;
+         }
+      }
+      // at the end of the queue, stow the arm to prepare for next round
+      newActionQueue.push([0, 0, 0]);
+      console.log(newActionQueue);
+      setActionQueue(newActionQueue);
+   }
+
+   const playNextQueuedAction = () => {
+      // pop off the next action to play from the queue
+      const newActionQueue = [...actionQueue];
+      const action = newActionQueue.shift()
+      if (action != undefined) {
+         setActionQueue(newActionQueue)
+         // mark this action as our last played action
+         setLastPlayedAction(action);
+         playAction(action);
+      }
+   }
+
+   const replayLastAction = () => {
+      playAction(lastPlayedAction);
    }
 
    const menuPanel = () => {
@@ -94,7 +168,6 @@ function App({onBoardCalibClick, onHolderCalibClick, onArmForwardClick, onArmBac
             boardMinus={boardMinus}
             boardPlus={boardPlus}
             onBackClick={onBackClick}
-            useCam={useCam}
          ></Settings>
       } else if (menu == 'CONFIG'){
          return <Config 
@@ -123,7 +196,11 @@ function App({onBoardCalibClick, onHolderCalibClick, onArmForwardClick, onArmBac
          return <Moves onBackClick={onBackClick} 
                        onOverrideBoardClick={onOverrideBoardClick} 
                        onOverrideHandClick={onOverrideHandClick}
-                       onPlayTileClick={playTile}
+                       onArmLeftClick={onBaseLeftClick}
+                       onArmRightClick={onBaseRightClick}
+                       onArmUpClick={onArmForwardClick}
+                       onArmDownClick={onArmBackClick}
+                       queueWord={queueWord}
                ></Moves>
       }
    }
