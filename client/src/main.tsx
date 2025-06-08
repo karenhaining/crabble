@@ -27,6 +27,7 @@ ros.on('connection', function() {
   createAlignmentMathClient();
   createCalibrationPublishers();
   subscribeToCameraVideo();
+  subscribeToActions();
 });
 
 // Create subscription to the camera video topic
@@ -39,7 +40,6 @@ const subscribeToCameraVideo = () => {
   });
   topic.subscribe((message) => {
      if (cameraImage != null) {
-        //console.log('meow')
         cameraImage.src = "data:image/jpg;base64," + message.data;
      }
   });
@@ -117,10 +117,8 @@ const subscribeToActions = () => {
             name: "/stretch_controller/follow_joint_trajectory/_action/status",
             messageType: "action_msgs/msg/GoalStatusArray",
     });
-    console.log("subscribing to actions")
-    actionTopic.subscribe((message: any) => {console.log(message);
+    actionTopic.subscribe((message: any) => {
     if (message.status_list[message.status_list.length - 1].status == 4) {
-      console.log("last completed");  
       queuedMovementsCallback();
     }
     });
@@ -164,7 +162,7 @@ const subscribeToActions = () => {
    const COLUMNLENGTH = 0.023;
    const GRIPPER_OPEN = 0.050;
    const GRIPPER_PLACED = 0.040;
-   const GRIPPER_HOLDING = 0.020;
+   const GRIPPER_HOLDING = 0.031;
    const OFFSET_FOR_BOARD_CENTERING = 1; // TODO: Measure and change this value
    const ROTATION_OFFSET = 0;//0.075;
    const PARK_DISTANCE = 1.02;
@@ -209,19 +207,6 @@ const subscribeToActions = () => {
    };
 
    // Calibration wrapper functions
-   const getCalibrationData = () => {
-      let request = new ROSLIB.ServiceRequest({})
-      let calibration;
-      alignmentMathClient.callService(request, (response: any) => {
-         calibration = response.message;
-         let calibration_array = calibration.split(" ");
-         first_row = parseFloat(calibration_array[0]);
-         offsets_from_center = parseFloat(calibration_array[1]);
-         holder_arm = parseFloat(calibration_array[2]);
-         holder_offsets = parseFloat(calibration_array[3]);
-    });
-   }
-  
    const publishBoardCalibration = (value: number) => {
       let msg = new ROSLIB.Message({
         data: value
@@ -250,17 +235,10 @@ const subscribeToActions = () => {
       holderOffsetTopic.publish(msg);
    }
 
-   // vision node wrapper function
-   /*const getBoardState = () => {
-      let request = new ROSLIB.ServiceRequest({})
-      visionNodeClient.callService(request, (response: any) => {boardState = response});
-      console.log(boardState);
-      return boardState;
-   }*/
-
    // FUNCTIONS THAT MOVE THE ROBOT
-   const moveBaseForward = () => {
+   const moveBaseForward = (markiplier: number) => {
       let delta = COLUMNLENGTH/4;
+      delta = delta * markiplier;
       offsets_from_center += delta;
       holder_offsets += delta;
 
@@ -269,8 +247,9 @@ const subscribeToActions = () => {
       executeFollowJointTrajectory(['translate_mobile_base'], [delta]);
    };
 
-   const moveBaseBackward = () => {
+   const moveBaseBackward = (multiplier: number) => {
       let delta = -1 * COLUMNLENGTH/4;
+      delta = delta * multiplier;
       offsets_from_center += delta;
       holder_offsets += delta;
   
@@ -280,14 +259,14 @@ const subscribeToActions = () => {
       executeFollowJointTrajectory(['translate_mobile_base'], [delta]);
    };
 
-   const moveArmForward = () => {
+   const moveArmForward = (multiplier: number) => {
       let currPos = jointState['position'][0]
-      executeFollowJointTrajectory(['wrist_extension'], [currPos + ROWLENGTH/1]);
+      executeFollowJointTrajectory(['wrist_extension'], [currPos + (ROWLENGTH * multiplier)]);
     };
 
-   const moveArmBackward = () => {
+   const moveArmBackward = (markiplier: number) => {
       let currPos = jointState['position'][0]
-      executeFollowJointTrajectory(['wrist_extension'], [currPos - ROWLENGTH/4]);
+      executeFollowJointTrajectory(['wrist_extension'], [currPos - (ROWLENGTH/4) * markiplier]);
    };
 
 
@@ -439,11 +418,11 @@ const subscribeToActions = () => {
            time_from_start: { secs: 1, nsecs: 0 },
          },
          {
-           positions: [GRIPPER_HOLDING, TABLETOP + 0.015],
+           positions: [GRIPPER_HOLDING, TABLETOP + 0.005],
            time_from_start: { secs: 4, nsecs: 0 },
          },
          {
-           positions: [GRIPPER_PLACED, TABLETOP + 0.015],
+           positions: [GRIPPER_PLACED, TABLETOP + 0.005],
            time_from_start: { secs: 7, nsecs: 0 },
          },
          {
@@ -675,6 +654,81 @@ const subscribeToActions = () => {
     executeFollowJointTrajectory(['wrist_extension', 'translate_mobile_base'], [wrist_target, drive_target]);
   }
 
+  const StowArmAndDriveToCenter = () => {
+    let goal = new ROSLIB.ActionGoal({
+      trajectory: {
+        header: { stamp: { secs: 0, nsecs: 0 } },
+        joint_names: ['wrist_extension', 'joint_lift'],
+        points: [
+        {
+            positions: [0.05, NEUTRAL_ELEV + 0.1,],
+          },
+          
+        ],
+      },
+
+    });
+
+    queuedMovements.push(
+      {
+        header: { stamp: { secs: 0, nsecs: 0 } },
+        joint_names: ['wrist_extension', 'joint_lift'],
+        points: [
+        {
+            positions: [0.05, NEUTRAL_ELEV + 0.15],
+          },
+          
+        ],
+      }
+    )
+    queuedMovements.push(
+      {
+        header: { stamp: { secs: 0, nsecs: 0 } },
+        joint_names: ['joint_wrist_pitch'],
+        points: [
+        {
+            positions: [ -1.5],
+          },
+          
+        ],
+      }
+    )
+
+    queuedMovements.push(
+      {
+        header: { stamp: { secs: 0, nsecs: 0 } },
+        joint_names: ['wrist_extension', 'joint_lift',],
+        points: [
+        {
+            positions: [0.05, NEUTRAL_ELEV - 0.3, ],
+          },
+          
+        ],
+      }
+    )
+
+    
+    let driveDistance = -1 * offsets_from_center
+    offsets_from_center += driveDistance;
+    holder_offsets += driveDistance;
+    publishBoardOffsetDelta(driveDistance);
+    publishHolderOffsetDelta(driveDistance)
+    
+    queuedMovements.push(
+      {
+        header: { stamp: { secs: 0, nsecs: 0 } },
+        joint_names: ['translate_mobile_base',],
+        points: [
+        {
+            positions: [driveDistance],
+          },
+          
+        ],
+      }
+    )
+    trajectoryClient.createClient(goal);
+  }
+
    // CALIBRATION
    const saveCalibration = () => {
       first_row = jointState['position'][0];
@@ -718,11 +772,23 @@ const subscribeToActions = () => {
       driveToCenterOfBoard([0, 2], [1, 3]);
    }
 
+   const loadCalibration = () => {
+    let request = new ROSLIB.ServiceRequest({})
+    let calibration;
+    alignmentMathClient.callService(request, (response:any) => {calibration = response.message;
+      let calibration_array = calibration.split(" ");
+    first_row = parseFloat(calibration_array[0]);
+    offsets_from_center = parseFloat(calibration_array[1]);
+    holder_arm = parseFloat(calibration_array[2]);
+    holder_offsets = parseFloat(calibration_array[3]);
+    });
+   }
+
   const playAction = (action: number[]) => {
     // figure out what we need to to based on the opcode
     switch (action[0]) {
       case 0: // stow the arm
-        StowArm();
+        StowArmAndDriveToCenter();
         break;
       case 1: // go to holder position
         MoveToHolderTarget(action[1]);
@@ -736,7 +802,7 @@ const subscribeToActions = () => {
       case 4: // drop a tile
         dropTile();
         break;
-      case 5: 
+      case 5:  // deploy
         DeployArm();
         break;
       default: // do nothing if this is an invalid opcode
@@ -767,16 +833,14 @@ createRoot(document.getElementById('root')!).render(
       onBaseCounterClick={RotateCounterClockwise}
       onArucoAlignClick={alignToArucoMarkerArg} 
       onParallelParkClick={parallelParkArg} 
-      onReachClick={reachToFurthestRowArg}
       onBoardCenterClick={driveToCenterOfBoardArg}
-      onLookDownClick={rotateHeadDown}
-      onHeadClockwiseClick={rotateHeadRelativeClockwise}
-      onHeadCounterClick={rotateHeadRelativeCounterclockwise}
-      onWristLevelClick={SetHandToBase}
       pickupTile={pickupTile}
       dropTile={dropTile}
       MoveToHolderTarget={MoveToHolderTarget}
       playAction={playAction}
+      StowArm={StowArm}
+      loadCalibration={loadCalibration}
+      DeployArm={DeployArm}
       />
       {cameraDiv}
    </div>

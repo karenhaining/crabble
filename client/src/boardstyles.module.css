@@ -1,5 +1,6 @@
 .gameBoard { 
   justify-content: center;
+  padding-right: 200px;
  }
 
 .hand { 
@@ -26,17 +27,21 @@
 
 .buttonLeft {
   font-size: 30px;
-  width: 100px;
+  width: 105px;
   margin-bottom: 10px;
-  margin-right: 25px;
+  margin-right: 15px;
   text-align: center;
+  padding-left: 0px;
+  padding-right: 0px;
 }
 
 .buttonRight {
   font-size: 30px;
   margin-bottom: 10px;
-  width: 100px;
+  width: 105px;
   text-align: center;
+  padding-left: 0px;
+  padding-right: 0px;
 }
 
 .doubleOption {
@@ -138,6 +143,8 @@
 
 .cameraDiv {
   transform: rotate(90deg);
+  width: 700px;
+  height: 700px;
 }
 
 .cameraImg {
