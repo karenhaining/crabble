@@ -58,14 +58,14 @@ class Board():
     SIZE = 15
 
     def __init__(self):
-        self.board = [[LetterState() for _ in range(self.SIZE)] for _ in range(self.SIZE)]
+        self.board = [[EMPTY for _ in range(self.SIZE)] for _ in range(self.SIZE)]
 
     def __str__(self):
         ret = ""
         for row in range(self.SIZE):
             row_str = "|"
             for col in range(self.SIZE):
-                letter = self.board[row][col].get_letter()
+                letter = self.board[row][col]
                 if letter == EMPTY:
                     letter = ' '
                 row_str += letter + "|"
@@ -77,7 +77,7 @@ class Board():
         if x > self.SIZE or y > self.SIZE:
             raise Exception(f'({x}, {y}) out of range')
 
-        self.board[x][y].add_letter(letter)
+        self.board[x][y] = letter
 
     def get_rep(self):
         rep = [['' for _ in range(self.SIZE)] for _ in range(self.SIZE)]
