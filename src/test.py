@@ -25,11 +25,12 @@ for file in files:
 
 board = letters.get_rep()
 
-ret = ""
-for row in range(15):
-    row_str = "|"
-    for col in range(15):
-        letter = board[row][col]
-        row_str += str(letter) + "|"
-    ret += row_str + "\n"
-print(ret)
+print(board)
+# ret = ""
+# for row in range(15):
+#     row_str = "|"
+#     for col in range(15):
+#         letter = board[row][col]
+#         row_str += str(letter) + "|"
+#     ret += row_str + "\n"
+# print(ret)

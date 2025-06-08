@@ -82,8 +82,8 @@ class Board():
     def get_rep(self):
         rep = [['' for _ in range(self.SIZE)] for _ in range(self.SIZE)]
 
-        for row in len(self.SIZE):
-            for col in len(self.SIZE):
+        for row in range(self.SIZE):
+            for col in range(self.SIZE):
                 rep[row][col] = self.board[row][col].get_letter()
 
         return rep
