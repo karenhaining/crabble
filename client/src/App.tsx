@@ -9,31 +9,23 @@ import Config from './Config'
 function App(
    {onBoardCalibClick, onHolderCalibClick, onArmForwardClick, onArmBackClick, 
     onBaseLeftClick, onBaseRightClick, onBaseClockwiseClick, onBaseCounterClick, onArucoAlignClick, 
-    onParallelParkClick, onReachClick, onBoardCenterClick, onLookDownClick, onHeadClockwiseClick, onHeadCounterClick,
-    onWristLevelClick, pickupTile, dropTile, MoveToHolderTarget,
+    onParallelParkClick, onBoardCenterClick, pickupTile, dropTile, MoveToHolderTarget,
     playAction, StowArm, loadCalibration, DeployArm
    }:
 
-   {onBoardCalibClick: () => void, onHolderCalibClick: () => void, onArmForwardClick: () => void,
-    onArmBackClick: () => void, onBaseLeftClick: () => void, onBaseRightClick: () => void, 
+   {onBoardCalibClick: () => void, onHolderCalibClick: () => void,
+    onArmForwardClick: (multiplier: number) => void, onArmBackClick: (markiplier: number) => void,
+    onBaseLeftClick: (markiplier: number) => void, onBaseRightClick: (markiplier: number) => void, 
     onBaseClockwiseClick: () => void, onBaseCounterClick: () => void, onArucoAlignClick: () => void,
-    onParallelParkClick: () => void, onReachClick: () => void, onBoardCenterClick: () => void, 
-    onLookDownClick: () => void, onHeadClockwiseClick: () => void, onHeadCounterClick: () => void,
-    onWristLevelClick: () => void, pickupTile: () => void, dropTile: () => void, MoveToHolderTarget: (target: number) => void,
+    onParallelParkClick: () => void, onBoardCenterClick: () => void, 
+    pickupTile: () => void, dropTile: () => void, MoveToHolderTarget: (target: number) => void,
     playAction: (action: number[]) => void, StowArm: () => void, loadCalibration: () => void, DeployArm: () => void
    }) {
    
    // INTERFACE THINGS, FOR REAL THIS TIME
-   const rawr = new Array(15).fill(null).map(() => new Array(15).fill(""));
-   rawr[0][2] = 'C';
-   rawr[1][2] = 'R';
-   rawr[2][2] = 'A';
-   rawr[3][2] = 'B';
-   rawr[0][0] = 'M';
-   rawr[0][1] = 'I';
    const [menu, setMenu] = useState('MENU');
    const [useCam, setUseCam] = useState(false);
-   const [board, setBoard] = useState(rawr);
+   const [board, setBoard] = useState(new Array(15).fill(null).map(() => new Array(15).fill("")));
    const [hand, setHand] = useState(new Array(7).fill(null).map(() => ""));
    const [overrideBoard, setOverrideBoard] = useState(new Array(15).fill(null).map(() => new Array(15).fill("")));
    const [overrideHand, setOverrideHand] = useState(new Array(7).fill(null).map(() => ""));
@@ -189,12 +181,7 @@ function App(
             onBaseCounterClick={onBaseCounterClick}
             onArucoAlignClick={onArucoAlignClick} 
             onParallelParkClick={onParallelParkClick} 
-            onReachClick={onReachClick}
             onBoardCenterClick={onBoardCenterClick}
-            onLookDownClick={onLookDownClick}
-            onHeadClockwiseClick={onHeadClockwiseClick}
-            onHeadCounterClick={onHeadCounterClick}
-            onWristLevelClick={onWristLevelClick}
             pickupTile={pickupTile}
             dropTile={dropTile}
             MoveToHolderTarget={() => {MoveToHolderTarget(selTile)}}
@@ -233,6 +220,8 @@ function App(
    const doBoardResponse = (res: Response): void => {
       if (res.status === 200) {
          res.json().then(doBoardJson)
+      } else {
+         console.log(res)
       }
    }
 

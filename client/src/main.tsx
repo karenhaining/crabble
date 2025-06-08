@@ -40,7 +40,6 @@ const subscribeToCameraVideo = () => {
   });
   topic.subscribe((message) => {
      if (cameraImage != null) {
-        //console.log('meow')
         cameraImage.src = "data:image/jpg;base64," + message.data;
      }
   });
@@ -118,7 +117,7 @@ const subscribeToActions = () => {
             name: "/stretch_controller/follow_joint_trajectory/_action/status",
             messageType: "action_msgs/msg/GoalStatusArray",
     });
-    actionTopic.subscribe((message: any) => {console.log(message);
+    actionTopic.subscribe((message: any) => {
     if (message.status_list[message.status_list.length - 1].status == 4) {
       queuedMovementsCallback();
     }
@@ -163,7 +162,7 @@ const subscribeToActions = () => {
    const COLUMNLENGTH = 0.023;
    const GRIPPER_OPEN = 0.050;
    const GRIPPER_PLACED = 0.040;
-   const GRIPPER_HOLDING = 0.020;
+   const GRIPPER_HOLDING = 0.031;
    const OFFSET_FOR_BOARD_CENTERING = 1; // TODO: Measure and change this value
    const ROTATION_OFFSET = 0;//0.075;
    const PARK_DISTANCE = 1.02;
@@ -208,19 +207,6 @@ const subscribeToActions = () => {
    };
 
    // Calibration wrapper functions
-   const getCalibrationData = () => {
-      let request = new ROSLIB.ServiceRequest({})
-      let calibration;
-      alignmentMathClient.callService(request, (response: any) => {
-         calibration = response.message;
-         let calibration_array = calibration.split(" ");
-         first_row = parseFloat(calibration_array[0]);
-         offsets_from_center = parseFloat(calibration_array[1]);
-         holder_arm = parseFloat(calibration_array[2]);
-         holder_offsets = parseFloat(calibration_array[3]);
-    });
-   }
-  
    const publishBoardCalibration = (value: number) => {
       let msg = new ROSLIB.Message({
         data: value
@@ -250,8 +236,9 @@ const subscribeToActions = () => {
    }
 
    // FUNCTIONS THAT MOVE THE ROBOT
-   const moveBaseForward = () => {
+   const moveBaseForward = (markiplier: number) => {
       let delta = COLUMNLENGTH/4;
+      delta = delta * markiplier;
       offsets_from_center += delta;
       holder_offsets += delta;
 
@@ -260,8 +247,9 @@ const subscribeToActions = () => {
       executeFollowJointTrajectory(['translate_mobile_base'], [delta]);
    };
 
-   const moveBaseBackward = () => {
+   const moveBaseBackward = (multiplier: number) => {
       let delta = -1 * COLUMNLENGTH/4;
+      delta = delta * multiplier;
       offsets_from_center += delta;
       holder_offsets += delta;
   
@@ -271,14 +259,14 @@ const subscribeToActions = () => {
       executeFollowJointTrajectory(['translate_mobile_base'], [delta]);
    };
 
-   const moveArmForward = () => {
+   const moveArmForward = (multiplier: number) => {
       let currPos = jointState['position'][0]
-      executeFollowJointTrajectory(['wrist_extension'], [currPos + ROWLENGTH/1]);
+      executeFollowJointTrajectory(['wrist_extension'], [currPos + (ROWLENGTH * multiplier)]);
     };
 
-   const moveArmBackward = () => {
+   const moveArmBackward = (markiplier: number) => {
       let currPos = jointState['position'][0]
-      executeFollowJointTrajectory(['wrist_extension'], [currPos - ROWLENGTH/4]);
+      executeFollowJointTrajectory(['wrist_extension'], [currPos - (ROWLENGTH/4) * markiplier]);
    };
 
 
@@ -845,12 +833,7 @@ createRoot(document.getElementById('root')!).render(
       onBaseCounterClick={RotateCounterClockwise}
       onArucoAlignClick={alignToArucoMarkerArg} 
       onParallelParkClick={parallelParkArg} 
-      onReachClick={reachToFurthestRowArg}
       onBoardCenterClick={driveToCenterOfBoardArg}
-      onLookDownClick={rotateHeadDown}
-      onHeadClockwiseClick={rotateHeadRelativeClockwise}
-      onHeadCounterClick={rotateHeadRelativeCounterclockwise}
-      onWristLevelClick={SetHandToBase}
       pickupTile={pickupTile}
       dropTile={dropTile}
       MoveToHolderTarget={MoveToHolderTarget}

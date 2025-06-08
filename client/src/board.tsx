@@ -60,10 +60,14 @@ function Board(
   const tbArrowStyle = {
     width: `${60 * (boardGridSize)}px`,
     height: `${75}px`,
+    paddingLeft: '0px',
+    paddingRight: '0px'
   }
   const lrArrowStyle = {
     width: `${75}px`,
     height: `${60 * (boardGridSize)}px`,
+    paddingLeft: '0px',
+    paddingRight: '0px'
   }
 
 

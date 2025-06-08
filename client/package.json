@@ -7,7 +7,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start-api": "cd ../src && flask run --no-debugger"
+    "start-api": "cd ../src && flask run -p 8000"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
