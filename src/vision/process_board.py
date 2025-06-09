@@ -2,7 +2,6 @@ import cv2
 import base64
 
 import numpy as np
-import matplotlib.pyplot as plt
 from vision import util
 from vision import config
 
